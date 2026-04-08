@@ -79,8 +79,8 @@ JWT_SECRET=your_secret
 
 ## 👨‍💻 Author
 
-Lakshya Pandey
-Prince Mittal
+* Lakshya Pandey
+* Prince Mittal
 
 ---
 
