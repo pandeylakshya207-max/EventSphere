@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  password      String?
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("ATTENDEE") // ORGANISER or ATTENDEE
+  events        Event[]   @relation("OrganizedBy")
+  tickets       Ticket[]
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Event {
+  id          String       @id @default(cuid())
+  title       String
+  performer   String?
+  description String
+  date        DateTime
+  time        String
+  venue       String
+  category    String       @default("General")
+  image       String?
+  organizerId String
+  organizer   User         @relation("OrganizedBy", fields: [organizerId], references: [id])
+  tiers       TicketTier[]
+  tickets     Ticket[]
+  createdAt   DateTime     @default(now())
+}
+
+model TicketTier {
+  id        String   @id @default(cuid())
+  name      String   // e.g., "General", "VIP"
+  price     Float
+  capacity  Int
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tickets   Ticket[]
+}
+
+model Ticket {
+  id          String     @id @default(cuid())
+  eventId     String
+  userId      String
+  tierId      String
+  qrCode      String     @unique
+  status      String     @default("PAID")
+  checkedIn   Boolean    @default(false)
+  event       Event      @relation(fields: [eventId], references: [id])
+  user        User       @relation(fields: [userId], references: [id])
+  tier        TicketTier @relation(fields: [tierId], references: [id])
+  createdAt   DateTime   @default(now())
+}
