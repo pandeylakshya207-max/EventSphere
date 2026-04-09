@@ -12,33 +12,44 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { title, description, date, time, venue, category, tiers, performer, image } = body;
 
-    // First create the event
-    const event = await prisma.event.create({
-      data: {
-        title,
-        performer,
-        description,
-        date: new Date(date),
-        // @ts-ignore
-        time,
-        venue,
-        category,
-        image: image || "https://images.unsplash.com/photo-1514525253361-bee8718a300a?q=80&w=1000&auto=format&fit=crop",
-        organizer: {
-          connect: { id: (session.user as any).id }
-        },
-        tiers: {
-          create: tiers.map((t: any) => ({
-            name: t.name,
-            price: parseFloat(t.price),
-            capacity: parseInt(t.capacity),
-          }))
+    // Create event and update user role in a transaction
+    const event = await prisma.$transaction(async (tx) => {
+      // Create the event
+      const newEvent = await tx.event.create({
+        data: {
+          title,
+          performer,
+          description,
+          date: new Date(date),
+          // @ts-ignore
+          time,
+          venue,
+          category,
+          image: image || "https://images.unsplash.com/photo-1514525253361-bee8718a300a?q=80&w=1000&auto=format&fit=crop",
+          organizer: {
+            connect: { id: (session.user as any).id }
+          },
+          tiers: {
+            create: tiers.map((t: any) => ({
+              name: t.name,
+              price: parseFloat(t.price),
+              capacity: parseInt(t.capacity),
+            }))
+          }
+        } as any,
+        include: {
+          // @ts-ignore
+          tiers: true
         }
-      } as any,
-      include: {
-        // @ts-ignore
-        tiers: true
-      }
+      });
+
+      // Update user role to ORGANISER if they are currently an ATTENDEE
+      await tx.user.update({
+        where: { id: (session.user as any).id },
+        data: { role: "ORGANISER" }
+      });
+
+      return newEvent;
     });
 
     return NextResponse.json(event);

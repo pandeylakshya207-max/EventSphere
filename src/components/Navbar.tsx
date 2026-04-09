@@ -4,7 +4,14 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import {
-  Ticket, User, LogOut, LayoutDashboard, Globe, Menu, X,
+  Ticket,
+  User,
+  LogOut,
+  LayoutDashboard,
+  Globe,
+  Menu,
+  X,
+  Plus, // ✅ FIXED IMPORT
 } from "lucide-react";
 
 export function Navbar() {
@@ -28,11 +35,18 @@ export function Navbar() {
     { href: "/events", label: "Discover", icon: Globe },
     ...(session
       ? [
-          { href: "/tickets", label: "My Tickets", icon: Ticket },
-          ...((session.user as any).role === "ORGANISER"
-            ? [{ href: "/organiser", label: "Dashboard", icon: LayoutDashboard }]
-            : []),
-        ]
+        { href: "/create-event", label: "Host Event", icon: Plus },
+        { href: "/tickets", label: "My Tickets", icon: Ticket },
+        ...((session.user as any).role === "ORGANISER"
+          ? [
+            {
+              href: "/organiser",
+              label: "Dashboard",
+              icon: LayoutDashboard,
+            },
+          ]
+          : []),
+      ]
       : []),
   ];
 
@@ -43,89 +57,82 @@ export function Navbar() {
           "fixed top-0 w-full z-50 transition-all duration-300",
           scrolled
             ? "h-14 bg-black/70 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/40"
-            : "h-20 bg-transparent border-b border-transparent",
+            : "h-16 md:h-20 bg-transparent border-b border-transparent",
         ].join(" ")}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
-          {/* ── Logo ──────────────────────────────────── */}
-          <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
+
+          {/* ── Logo ───────────────── */}
+          <Link href="/" className="flex items-center gap-2 md:gap-3 group">
             <div
               className={[
-                "bg-gradient-to-br from-brand-purple to-brand-cyan rounded-xl flex items-center justify-center group-hover:rotate-12 transition-all duration-500 shadow-lg shadow-brand-purple/20",
-                scrolled ? "w-8 h-8" : "w-10 h-10",
+                "bg-gradient-to-br from-brand-purple to-brand-cyan rounded-xl flex items-center justify-center transition-all duration-500",
+                scrolled ? "w-8 h-8" : "w-9 h-9 md:w-10 md:h-10",
               ].join(" ")}
             >
               <Ticket
-                className="text-white transition-all duration-300"
-                size={scrolled ? 18 : 22}
+                className="text-white"
+                size={scrolled ? 16 : 18}
               />
             </div>
+
             <span
               className={[
-                "font-black text-white tracking-tighter uppercase transition-all duration-300",
-                scrolled ? "text-xl" : "text-2xl",
+                "font-black text-white tracking-tight uppercase",
+                "text-lg md:text-2xl",
               ].join(" ")}
             >
-              Event<span className="text-brand-purple text-glow">Sphere</span>
+              Event<span className="text-brand-purple">Sphere</span>
             </span>
           </Link>
 
-          {/* ── Desktop Nav Links ─────────────────────── */}
+          {/* ── Desktop Nav ───────── */}
           <div className="hidden md:flex items-center gap-6">
             {navLinks.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
-                className="text-sm font-bold text-gray-400 hover:text-white transition-colors flex items-center gap-2 group"
+                className="text-sm font-semibold text-gray-400 hover:text-white transition flex items-center gap-2"
               >
-                <Icon
-                  size={16}
-                  className="text-gray-500 group-hover:text-brand-purple transition-colors"
-                />
+                <Icon size={16} />
                 {label}
               </Link>
             ))}
           </div>
 
-          {/* ── Right side ────────────────────────────── */}
-          <div className="flex items-center gap-3">
+          {/* ── Right Side ───────── */}
+          <div className="flex items-center gap-2 md:gap-3">
+
             {session ? (
-              <div className="flex items-center gap-3">
-                {/* User info — desktop only */}
-                <div className="hidden lg:block text-right">
-                  <div className="text-xs font-bold text-white leading-none">
-                    {session.user?.name}
-                  </div>
-                  <div className="text-[10px] text-gray-500 uppercase tracking-widest mt-0.5">
-                    {(session.user as any).role}
-                  </div>
+              <>
+                {/* Avatar */}
+                <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-brand-purple/20 border border-brand-purple/40 flex items-center justify-center text-brand-purple-light text-sm font-bold">
+                  {session.user?.name?.[0]?.toUpperCase() ?? (
+                    <User size={14} />
+                  )}
                 </div>
 
-                {/* Avatar bubble */}
-                <div className="w-9 h-9 rounded-full bg-brand-purple/20 border border-brand-purple/40 flex items-center justify-center text-brand-purple-light font-black text-sm flex-shrink-0">
-                  {session.user?.name?.[0]?.toUpperCase() ?? <User size={16} />}
-                </div>
-
-                {/* Sign out */}
+                {/* Logout */}
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="hidden md:flex p-2 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/5 transition-all"
-                  title="Sign Out"
+                  className="hidden md:flex p-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-red-400 transition"
                 >
-                  <LogOut size={18} />
+                  <LogOut size={16} />
                 </button>
-              </div>
+              </>
             ) : (
-              <Link href="/auth/signin" className="btn-primary py-2 px-5 text-sm">
+              <Link
+                href="/auth/signin"
+                className="px-3 py-1.5 md:px-5 md:py-2 text-sm rounded-lg bg-brand-purple text-white font-semibold"
+              >
                 Sign In
               </Link>
             )}
 
-            {/* Mobile hamburger */}
+            {/* Mobile Menu */}
             <button
               onClick={() => setMobileOpen((v) => !v)}
-              className="md:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-all"
-              aria-label="Toggle menu"
+              className="md:hidden p-2 rounded-lg bg-white/5 border border-white/10 text-gray-400"
             >
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -133,25 +140,26 @@ export function Navbar() {
         </div>
       </nav>
 
-      {/* ── Mobile Menu Drawer ───────────────────────────── */}
+      {/* ── Mobile Drawer ───────── */}
       <div
         className={[
-          "fixed inset-x-0 z-40 md:hidden transition-all duration-300 ease-in-out",
+          "fixed inset-x-0 z-40 md:hidden transition-all duration-300",
           mobileOpen
-            ? "top-14 opacity-100 pointer-events-auto"
+            ? "top-14 opacity-100"
             : "top-14 opacity-0 pointer-events-none -translate-y-2",
         ].join(" ")}
       >
-        <div className="mx-4 mt-2 rounded-2xl bg-black/80 backdrop-blur-2xl border border-white/10 overflow-hidden shadow-2xl shadow-black/60">
-          <div className="p-4 space-y-1">
+        <div className="mx-4 mt-2 rounded-xl bg-black/90 border border-white/10 shadow-lg">
+          <div className="p-3 space-y-1">
+
             {navLinks.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-300 hover:text-white hover:bg-white/10 transition-all"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-white/10"
               >
-                <Icon size={18} className="text-brand-purple" />
+                <Icon size={18} />
                 {label}
               </Link>
             ))}
@@ -159,7 +167,7 @@ export function Navbar() {
             {session && (
               <button
                 onClick={() => signOut({ callbackUrl: "/" })}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-400 hover:bg-red-500/10 transition-all mt-2"
+                className="w-full flex items-center gap-3 px-3 py-2 text-red-400"
               >
                 <LogOut size={18} />
                 Sign Out
@@ -167,19 +175,29 @@ export function Navbar() {
             )}
 
             {!session && (
-              <div className="pt-2">
-                <Link
-                  href="/auth/signin"
-                  onClick={() => setMobileOpen(false)}
-                  className="btn-primary w-full justify-center"
-                >
-                  Sign In
-                </Link>
-              </div>
+              <Link
+                href="/auth/signin"
+                className="block w-full text-center mt-2 px-4 py-2 rounded-lg bg-brand-purple text-white"
+              >
+                Sign In
+              </Link>
             )}
           </div>
         </div>
       </div>
+
+      {/* 🔥 MOBILE FIXED CTA (BIG UX BOOST) */}
+      {session && (
+        <div className="fixed bottom-4 left-4 right-4 md:hidden z-50">
+          <Link
+            href="/create-event"
+            className="flex items-center justify-center gap-2 bg-brand-purple text-white py-3 rounded-xl shadow-lg"
+          >
+            <Plus size={18} />
+            Host Event
+          </Link>
+        </div>
+      )}
     </>
   );
 }
