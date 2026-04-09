@@ -14,7 +14,7 @@ export async function GET(
     }
 
     const ticket = await prisma.ticket.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         event: true,
         user: true,

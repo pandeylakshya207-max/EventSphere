@@ -16,10 +16,9 @@ export async function POST(req: Request) {
         userId: (session.user as any).id,
         eventId: eventId,
         tierId: tierId,
-        price: parseFloat(price),
         status: "PAID",
         qrCode: `TICKET-${eventId}-${Math.random().toString(36).substring(7)}`,
-      },
+      } as any,
     });
 
     return NextResponse.json(ticket);
