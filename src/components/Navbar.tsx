@@ -7,11 +7,10 @@ import {
   Ticket,
   User,
   LogOut,
-  LayoutDashboard,
   Globe,
   Menu,
   X,
-  Plus, // ✅ FIXED IMPORT
+  Plus,
 } from "lucide-react";
 
 export function Navbar() {
@@ -31,21 +30,13 @@ export function Navbar() {
     setMobileOpen(false);
   }, []);
 
+  // ✅ FIXED: removed role restriction
   const navLinks = [
     { href: "/events", label: "Discover", icon: Globe },
     ...(session
       ? [
         { href: "/create-event", label: "Host Event", icon: Plus },
         { href: "/tickets", label: "My Tickets", icon: Ticket },
-        ...((session.user as any).role === "ORGANISER"
-          ? [
-            {
-              href: "/organiser",
-              label: "Dashboard",
-              icon: LayoutDashboard,
-            },
-          ]
-          : []),
       ]
       : []),
   ];
@@ -62,37 +53,29 @@ export function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
 
-          {/* ── Logo ───────────────── */}
+          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 md:gap-3 group">
             <div
               className={[
-                "bg-gradient-to-br from-brand-purple to-brand-cyan rounded-xl flex items-center justify-center transition-all duration-500",
+                "bg-gradient-to-br from-brand-purple to-brand-cyan rounded-xl flex items-center justify-center",
                 scrolled ? "w-8 h-8" : "w-9 h-9 md:w-10 md:h-10",
               ].join(" ")}
             >
-              <Ticket
-                className="text-white"
-                size={scrolled ? 16 : 18}
-              />
+              <Ticket className="text-white" size={scrolled ? 16 : 18} />
             </div>
 
-            <span
-              className={[
-                "font-black text-white tracking-tight uppercase",
-                "text-lg md:text-2xl",
-              ].join(" ")}
-            >
+            <span className="font-black text-white tracking-tight uppercase text-lg md:text-2xl">
               Event<span className="text-brand-purple">Sphere</span>
             </span>
           </Link>
 
-          {/* ── Desktop Nav ───────── */}
+          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-6">
             {navLinks.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
-                className="text-sm font-semibold text-gray-400 hover:text-white transition flex items-center gap-2"
+                className="text-sm font-semibold text-gray-400 hover:text-white flex items-center gap-2"
               >
                 <Icon size={16} />
                 {label}
@@ -100,22 +83,20 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* ── Right Side ───────── */}
+          {/* Right Side */}
           <div className="flex items-center gap-2 md:gap-3">
 
             {session ? (
               <>
                 {/* Avatar */}
                 <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-brand-purple/20 border border-brand-purple/40 flex items-center justify-center text-brand-purple-light text-sm font-bold">
-                  {session.user?.name?.[0]?.toUpperCase() ?? (
-                    <User size={14} />
-                  )}
+                  {session.user?.name?.[0]?.toUpperCase() ?? <User size={14} />}
                 </div>
 
                 {/* Logout */}
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="hidden md:flex p-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-red-400 transition"
+                  className="hidden md:flex p-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-red-400"
                 >
                   <LogOut size={16} />
                 </button>
@@ -140,7 +121,7 @@ export function Navbar() {
         </div>
       </nav>
 
-      {/* ── Mobile Drawer ───────── */}
+      {/* Mobile Drawer */}
       <div
         className={[
           "fixed inset-x-0 z-40 md:hidden transition-all duration-300",
@@ -186,7 +167,7 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* 🔥 MOBILE FIXED CTA (BIG UX BOOST) */}
+      {/* Mobile Sticky CTA */}
       {session && (
         <div className="fixed bottom-4 left-4 right-4 md:hidden z-50">
           <Link
