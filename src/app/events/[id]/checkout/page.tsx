@@ -63,52 +63,23 @@ export default function CheckoutPage() {
         throw new Error(orderData.message || orderData.error || "Failed to create order");
       }
 
-      // 2. Open Razorpay
-      if (typeof (window as any).Razorpay === "undefined") {
-        throw new Error("Razorpay SDK not loaded. Please refresh the page.");
-      }
-
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_1234567890",
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: "EventSphere",
-        description: `${quantity}x ${tier.name} Ticket to ${event.title}`,
-        order_id: orderData.id,
-        handler: async function (response: any) {
-          // 3. Verify Payment
-          const verifyRes = await fetch("/api/verify-payment", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            }),
-          });
-
-          const verifyData = await verifyRes.json();
-          if (verifyRes.ok && verifyData.success) {
-            toast.success(`Payment successful! ${quantity} ticket(s) generated.`);
-            router.push(`/tickets/${verifyData.ticketId}`);
-          } else {
-            toast.error(verifyData.message || verifyData.error || "Payment verification failed");
-          }
-        },
-        prefill: {
-          name: session?.user?.name || "",
-          email: session?.user?.email || "",
-        },
-        theme: {
-          color: "#8B5CF6",
-        },
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.on("payment.failed", function (response: any) {
-        toast.error(response.error.description || "Payment failed");
+      // 2. Demo Verification (Bypass Razorpay Modal)
+      const verifyRes = await fetch("/api/verify-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          razorpay_order_id: orderData.id,
+          demo: true,
+        }),
       });
-      rzp.open();
+
+      const verifyData = await verifyRes.json();
+      if (verifyRes.ok && verifyData.success) {
+        toast.success(`Demo payment successful! ${quantity} ticket(s) generated.`);
+        router.push(`/tickets/${verifyData.ticketId}`);
+      } else {
+        toast.error(verifyData.message || verifyData.error || "Payment verification failed");
+      }
     } catch (error: any) {
       toast.error(error.message || "Something went wrong during checkout");
     } finally {
@@ -180,14 +151,14 @@ export default function CheckoutPage() {
             </div>
 
             <div className="flex items-center gap-3 text-sm text-gray-400">
-              <ShieldCheck className="text-green-400" size={20} />
-              <span>Payments are 100% secure and encrypted via Razorpay.</span>
+              <ShieldCheck className="text-brand-purple" size={20} />
+              <span>Demo Mode: Tickets are generated instantly for preview purposes.</span>
             </div>
           </div>
 
           {/* Payment Summary */}
           <div className="glass-card p-8 sticky top-8 border-white/10 h-fit">
-            <h3 className="text-xl font-bold mb-6 text-white border-b border-white/5 pb-4">Payment Summary</h3>
+            <h3 className="text-xl font-bold mb-6 text-white border-b border-white/5 pb-4">Order Summary (Demo)</h3>
             
             <div className="space-y-4 mb-8 text-sm">
               <div className="flex justify-between text-gray-300">
