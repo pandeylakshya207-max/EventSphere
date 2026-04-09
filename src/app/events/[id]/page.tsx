@@ -10,35 +10,25 @@ import {
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { useEvents } from "@/context/EventContext";
 
 export default function EventDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const { data: session } = useSession();
+  const { getEventById } = useEvents();
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [selectedTier, setSelectedTier] = useState<any>(null);
 
   useEffect(() => {
-    fetchEvent();
-  }, [id]);
-
-  const fetchEvent = async () => {
-    try {
-      const res = await fetch(`/api/events/${id}`);
-      const data = await res.json();
-      if (res.ok) {
-        setEvent(data);
-      } else {
-        console.error("Failed to fetch event");
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+    const data = getEventById(id as string);
+    if (data) {
+      setEvent(data);
     }
-  };
+    setLoading(false);
+  }, [id, getEventById]);
 
   const handleBooking = () => {
     if (!session) {

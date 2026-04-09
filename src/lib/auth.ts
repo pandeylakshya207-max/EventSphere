@@ -1,10 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { prisma } from "@/lib/prisma";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: "Email and Password",
@@ -17,39 +14,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           throw new Error("Invalid credentials");
         }
         
-        let user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        });
-
-        // DEMO BYPASS: Auto-create and allow demo123
-        if (credentials.password === "demo123") {
-          if (!user) {
-            user = await prisma.user.create({
-              data: {
-                email: credentials.email as string,
-                role: (credentials.email as string).includes("organizer") ? "ORGANISER" : "ATTENDEE",
-                name: (credentials.email as string).split("@")[0],
-                // @ts-ignore
-                password: "demo",
-              },
-            });
-          }
-          return user;
+        // DEMO BYPASS: Allow anyone with 'demo123'
+        if (credentials.password === "demo123" || credentials.password === "demo") {
+           return {
+              id: "demo_user_id",
+              name: credentials.email.split("@")[0].toUpperCase(),
+              email: credentials.email as string,
+              role: "ORGANISER" // Default to organiser for demo
+           };
         }
 
-        const u = user as any;
-        if (!u || !u.password) {
-          throw new Error("User not found");
-        }
-
-        const bcrypt = require("bcryptjs");
-        const isValid = await bcrypt.compare(credentials.password, u.password);
-
-        if (!isValid) {
-          throw new Error("Invalid password");
-        }
-
-        return user;
+        throw new Error("Invalid credentials. Try password 'demo123'");
       },
     }),
   ],
@@ -60,7 +35,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as any).role;
+        token.role = (user as any).role || "ATTENDEE";
       }
       return token;
     },

@@ -9,6 +9,7 @@ import {
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { SkeletonCard } from "@/components/SkeletonCard";
+import { useEvents } from "@/context/EventContext";
 
 const categories = [
   { name: "All Experiences", icon: Grid },
@@ -20,26 +21,16 @@ const categories = [
 ];
 
 export default function EventsPage() {
+  const { events } = useEvents();
   const [activeCategory, setActiveCategory] = useState("All Experiences");
-  const [events, setEvents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchEvents();
+    // Simulate initial loading
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
   }, []);
-
-  const fetchEvents = async () => {
-    try {
-      const res = await fetch("/api/events");
-      const data = await res.json();
-      if (res.ok) setEvents(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const filteredEvents = events
     .filter(e => activeCategory === "All Experiences" || e.category === activeCategory)

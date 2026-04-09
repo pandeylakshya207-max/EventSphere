@@ -9,33 +9,29 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import { useEvents } from "@/context/EventContext";
+import { useSession } from "next-auth/react";
 
 export default function TicketPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
+  const { getTicketById } = useEvents();
   const [ticket, setTicket] = useState<any>(null);
   const [qrUrl, setQrUrl] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchTicket();
-  }, [id]);
-
-  const fetchTicket = async () => {
-    try {
-      const res = await fetch(`/api/tickets/${id}`);
-      const data = await res.json();
-      if (res.ok) {
-        setTicket(data);
-        generateQR(data.qrCode);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+    const data = getTicketById(id as string);
+    if (data) {
+      setTicket({
+          ...data,
+          user: session?.user || { name: "Attendee" }
+      });
+      generateQR(data.qrCode);
     }
-  };
+    setLoading(false);
+  }, [id, getTicketById, session]);
 
   const generateQR = async (text: string) => {
     try {

@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { ArrowLeft, Zap, ShieldCheck, Plus, Minus } from "lucide-react";
-import Link from "next/link";
+import { useEvents } from "@/context/EventContext";
 
 export default function CheckoutPage() {
   const { id } = useParams();
@@ -13,6 +12,7 @@ export default function CheckoutPage() {
   const tierId = searchParams.get("tier");
   const router = useRouter();
   const { data: session } = useSession();
+  const { getEventById, bookTicket } = useEvents();
 
   const [event, setEvent] = useState<any>(null);
   const [tier, setTier] = useState<any>(null);
@@ -26,60 +26,30 @@ export default function CheckoutPage() {
       return;
     }
 
-    const fetchEventData = async () => {
-      try {
-        const res = await fetch(`/api/events/${id}`);
-        const data = await res.json();
-        if (res.ok) {
-          setEvent(data);
-          const selectedTier = data.tiers?.find((t: any) => t.id === tierId);
-          if (selectedTier) setTier(selectedTier);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchEventData();
-  }, [id, tierId, session, router]);
+    const data = getEventById(id as string);
+    if (data) {
+      setEvent(data);
+      const selectedTier = data.tiers?.find((t: any) => t.id === tierId);
+      if (selectedTier) setTier(selectedTier);
+    }
+    setLoading(false);
+  }, [id, tierId, session, router, getEventById]);
 
   const handlePayment = async () => {
     if (!tier) return;
     setBookingLoading(true);
 
     try {
-      const totalAmount = tier.price * quantity;
+      // 1. Simulate Booking directly in context
+      const newTickets = bookTicket(
+        id as string, 
+        tier.id, 
+        (session?.user as any).id || "demo_user", 
+        quantity
+      );
 
-      // 1. Create Order
-      const orderRes = await fetch("/api/create-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventId: id, tierId: tier.id, quantity }),
-      });
-
-      const orderData = await orderRes.json();
-      if (!orderRes.ok || orderData.success === false) {
-        throw new Error(orderData.message || orderData.error || "Failed to create order");
-      }
-
-      // 2. Demo Verification (Bypass Razorpay Modal)
-      const verifyRes = await fetch("/api/verify-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          razorpay_order_id: orderData.id,
-          demo: true,
-        }),
-      });
-
-      const verifyData = await verifyRes.json();
-      if (verifyRes.ok && verifyData.success) {
-        toast.success(`Demo payment successful! ${quantity} ticket(s) generated.`);
-        router.push(`/tickets/${verifyData.ticketId}`);
-      } else {
-        toast.error(verifyData.message || verifyData.error || "Payment verification failed");
-      }
+      toast.success(`Demo payment successful! ${quantity} ticket(s) generated.`);
+      router.push(`/tickets/${newTickets[0].id}`);
     } catch (error: any) {
       toast.error(error.message || "Something went wrong during checkout");
     } finally {

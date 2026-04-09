@@ -22,10 +22,11 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <body className={`${outfit.className} bg-dark-bg text-white antialiased min-h-full`}>
         <Providers>
-          <Navbar />
-          {children}
-          <Toaster theme="dark" position="bottom-right" />
-          <script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
+          <EventProvider>
+            <Navbar />
+            {children}
+            <Toaster theme="dark" position="bottom-right" />
+          </EventProvider>
         </Providers>
       </body>
     </html>

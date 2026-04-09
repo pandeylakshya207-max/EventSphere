@@ -8,9 +8,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useEvents } from "@/context/EventContext";
 
 export default function CreateEventPage() {
   const router = useRouter();
+  const { addEvent } = useEvents();
   const [loading, setLoading] = useState(false);
   const [tiers, setTiers] = useState([
     { name: "General Admission", price: "0", capacity: "100" }
@@ -41,27 +43,18 @@ export default function CreateEventPage() {
       time: formData.get("time") as string,
       venue: formData.get("venue") as string,
       tiers: tiers.map((tier, i) => ({
+        id: `tier_${Math.random().toString(36).substring(2, 9)}`,
         name: (form.querySelector(`input[name="tier-name-${i}"]`) as HTMLInputElement).value,
-        price: (form.querySelector(`input[name="tier-price-${i}"]`) as HTMLInputElement).value,
-        capacity: (form.querySelector(`input[name="tier-qty-${i}"]`) as HTMLInputElement).value,
+        price: parseFloat((form.querySelector(`input[name="tier-price-${i}"]`) as HTMLInputElement).value),
+        capacity: parseInt((form.querySelector(`input[name="tier-qty-${i}"]`) as HTMLInputElement).value),
       })),
     };
 
     try {
-      const res = await fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(eventData),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        toast.success("Experience Launched! 🚀");
-        router.push(`/events/${data.id}`);
-      } else {
-        const error = await res.json();
-        toast.error(error.error || "Launch failed");
-      }
+      // Direct call to context
+      const newEvent = addEvent(eventData);
+      toast.success("Experience Launched! 🚀");
+      router.push(`/events/${newEvent.id}`);
     } catch (err) {
       toast.error("Something went wrong");
     } finally {

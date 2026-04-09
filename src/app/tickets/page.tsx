@@ -47,27 +47,21 @@ const itemVariants = {
   visible: { y: 0, opacity: 1, transition: { duration: 0.3, ease: "easeOut" as const } },
 };
 
+import { useEvents } from "@/context/EventContext";
+
 export default function MyTicketsPage() {
   const { data: session } = useSession();
+  const { getTicketsByUserId } = useEvents();
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (session) fetchTickets();
-    else setLoading(false);
-  }, [session]);
-
-  const fetchTickets = async () => {
-    try {
-      const res = await fetch("/api/tickets");
-      const data = await res.json();
-      if (res.ok) setTickets(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+    if (session) {
+      const userTickets = getTicketsByUserId((session.user as any).id || "demo_user");
+      setTickets(userTickets);
     }
-  };
+    setLoading(false);
+  }, [session, getTicketsByUserId]);
 
   return (
     <div className="min-h-screen bg-dark-bg relative overflow-hidden">
