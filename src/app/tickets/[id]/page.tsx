@@ -7,8 +7,8 @@ import {
   CheckCircle2, Download, Share2, 
   Calendar, ArrowLeft, Zap 
 } from "lucide-react";
-import Link from "next/link";
 import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import { useEvents } from "@/context/EventContext";
 import { useSession } from "next-auth/react";
 

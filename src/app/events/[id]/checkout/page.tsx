@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { ArrowLeft, Zap, ShieldCheck, Plus, Minus } from "lucide-react";
 import { useEvents } from "@/context/EventContext";
 
 export default function CheckoutPage() {

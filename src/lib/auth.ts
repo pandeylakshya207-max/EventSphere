@@ -16,10 +16,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         
         // DEMO BYPASS: Allow anyone with 'demo123'
         if (credentials.password === "demo123" || credentials.password === "demo") {
+          const email = credentials.email as string;
            return {
               id: "demo_user_id",
-              name: credentials.email.split("@")[0].toUpperCase(),
-              email: credentials.email as string,
+              name: email.split("@")[0].toUpperCase(),
+              email: email,
               role: "ORGANISER" // Default to organiser for demo
            };
         }

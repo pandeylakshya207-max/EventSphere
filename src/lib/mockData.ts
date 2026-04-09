@@ -18,6 +18,8 @@ export interface Event {
   organizerId: string;
   tiers: TicketTier[];
   createdAt: string;
+  price?: number;
+  capacity?: number;
 }
 
 export interface Ticket {
