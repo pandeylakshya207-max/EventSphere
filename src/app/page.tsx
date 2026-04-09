@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Calendar, Users, Zap, ShieldCheck } from "lucide-react";
+import { ArrowRight, Calendar, Users, Zap, ShieldCheck, Sparkles } from "lucide-react";
 import { signIn } from "next-auth/react";
+import { motion } from "framer-motion";
 
 export default function Home() {
   const handleQuickLogin = (role: string) => {
@@ -13,89 +14,101 @@ export default function Home() {
     });
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1 }
+  };
+
   return (
     <main className="min-h-screen relative flex flex-col items-center justify-center p-6 sm:p-24 overflow-hidden text-white bg-dark-bg w-full">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1025] to-[#0a0a0a] z-0" />
-      <div className="bg-glow absolute inset-0 z-0 opacity-50" />
+      {/* Mesh Gradient Background */}
+      <div className="mesh-gradient opacity-40" />
       
-      {/* Navbar */}
-      <nav className="fixed top-0 w-full p-6 flex justify-between items-center z-50 px-6 md:px-12 backdrop-blur-md border-b border-white/5">
-        <h1 className="text-2xl font-black tracking-tight">
-          Event<span className="text-brand-purple">Sphere</span>
-        </h1>
-        <div className="flex gap-6 items-center">
-          <Link href="/events" className="hidden md:block text-sm font-bold text-gray-400 hover:text-white transition-colors">Browse</Link>
-          <button 
-            onClick={() => handleQuickLogin("ORGANISER")}
-            className="flex items-center gap-2 bg-white/5 border border-white/10 text-white px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all cursor-pointer"
-          >
-            Host Demo Login
-          </button>
-          <button 
-            onClick={() => handleQuickLogin("ATTENDEE")}
-            className="flex items-center gap-2 bg-brand-purple text-white px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-brand-purple/25 cursor-pointer"
-          >
-            Attendee Demo Login
-          </button>
-        </div>
-      </nav>
-
       {/* Hero Section */}
-      <div className="z-10 text-center max-w-4xl mt-20">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-purple/10 border border-brand-purple/20 rounded-full text-brand-purple text-xs font-bold mb-6 animate-pulse">
-          <Zap size={14} />
-          <span>NEW: AI Event Booster Available</span>
-        </div>
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="z-10 text-center max-w-5xl mt-12"
+      >
+        <motion.div 
+          variants={itemVariants}
+          className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-purple/10 border border-brand-purple/20 rounded-full text-brand-purple-light text-[10px] font-black uppercase tracking-[0.2em] mb-8"
+        >
+          <Sparkles size={12} className="animate-pulse" />
+          <span>The Future of Event Management</span>
+        </motion.div>
         
-        <h1 className="text-5xl sm:text-7xl font-black mb-6 tracking-tight leading-tight">
-          Host Unforgettable <br />
-          <span className="text-gradient">Community Experiences</span>
-        </h1>
+        <motion.h1 
+          variants={itemVariants}
+          className="text-6xl sm:text-8xl font-black mb-8 tracking-tighter leading-[0.9] text-glow"
+        >
+          Launch <br />
+          <span className="text-gradient">Experiences</span>
+        </motion.h1>
         
-        <p className="text-gray-400 text-lg sm:text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
+        <motion.p 
+          variants={itemVariants}
+          className="text-gray-400 text-lg sm:text-xl mb-12 max-w-2xl mx-auto leading-relaxed font-medium"
+        >
           The all-in-one ticketing platform with AI-powered marketing and 
           lightning-fast check-ins. Built for growth, loved by communities.
-        </p>
+        </motion.p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Link href="/auth/signin" className="btn-primary text-lg px-10">
-            Sign Up Now — It's Free
+        <motion.div 
+          variants={itemVariants}
+          className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+        >
+          <Link href="/auth/signin" className="btn-premium group">
+            Get Started Free
+            <ArrowRight size={18} className="inline-block ml-2 group-hover:translate-x-1 transition-transform" />
           </Link>
-          <Link href="/events" className="px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 rounded-full font-semibold transition-all flex items-center gap-2">
-            Browse Events <ArrowRight size={18} />
+          <Link href="/events" className="px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 rounded-full font-bold transition-all flex items-center gap-2 shadow-2xl">
+            Browse Events
           </Link>
-        </div>
+        </motion.div>
 
         {/* Feature Highlights */}
-        <div className="mt-24 grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
-          <div className="glass-card p-6">
-            <div className="w-12 h-12 bg-brand-purple/10 flex items-center justify-center rounded-xl text-brand-purple mb-4">
-              <Zap size={24} />
+        <motion.div 
+          variants={containerVariants}
+          className="mt-32 grid grid-cols-1 sm:grid-cols-3 gap-8 text-left"
+        >
+          <motion.div variants={itemVariants} className="glass-card p-8 group">
+            <div className="w-14 h-14 bg-brand-purple/10 flex items-center justify-center rounded-2xl text-brand-purple mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform">
+              <Zap size={28} />
             </div>
-            <h3 className="font-bold text-xl mb-2">AI Magic</h3>
-            <p className="text-gray-400 text-sm">Generate professional titles and descriptions in seconds.</p>
-          </div>
+            <h3 className="font-black text-2xl mb-3 tracking-tight">AI Magic</h3>
+            <p className="text-gray-400 text-sm leading-relaxed">Generate professional titles and descriptions in seconds with our custom AI models.</p>
+          </motion.div>
           
-          <div className="glass-card p-6">
-            <div className="w-12 h-12 bg-brand-cyan/10 flex items-center justify-center rounded-xl text-brand-cyan mb-4">
-              <Calendar size={24} />
+          <motion.div variants={itemVariants} className="glass-card p-8 group">
+            <div className="w-14 h-14 bg-brand-cyan/10 flex items-center justify-center rounded-2xl text-brand-cyan mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform">
+              <Calendar size={28} />
             </div>
-            <h3 className="font-bold text-xl mb-2">Smart Schedule</h3>
-            <p className="text-gray-400 text-sm">Easily manage multi-track schedules for large conferences.</p>
-          </div>
+            <h3 className="font-black text-2xl mb-3 tracking-tight">Smart Flow</h3>
+            <p className="text-gray-400 text-sm leading-relaxed">Easily manage multi-track schedules for large conferences and boutique workshops.</p>
+          </motion.div>
           
-          <div className="glass-card p-6">
-            <div className="w-12 h-12 bg-white/10 flex items-center justify-center rounded-xl text-white mb-4">
-              <ShieldCheck size={24} />
+          <motion.div variants={itemVariants} className="glass-card p-8 group">
+            <div className="w-14 h-14 bg-white/10 flex items-center justify-center rounded-2xl text-white mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform">
+              <ShieldCheck size={28} />
             </div>
-            <h3 className="font-bold text-xl mb-2">Secure Tickets</h3>
-            <p className="text-gray-400 text-sm">Encrypted QR codes for seamless and fraud-proof check-ins.</p>
-          </div>
-        </div>
-      </div>
+            <h3 className="font-black text-2xl mb-3 tracking-tight">Secured</h3>
+            <p className="text-gray-400 text-sm leading-relaxed">Encrypted QR codes for seamless and fraud-proof check-ins at your venue.</p>
+          </motion.div>
+        </motion.div>
+      </motion.div>
 
-      <footer className="mt-32 text-gray-600 text-sm pb-12">
-        © 2026 EventSphere. Designed for the Future of Events.
+      <footer className="mt-32 text-gray-600 text-[10px] font-bold uppercase tracking-[0.3em] pb-12">
+        © 2026 EventSphere • Built for the Bold
       </footer>
     </main>
   );

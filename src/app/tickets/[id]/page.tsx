@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import QRCode from "qrcode";
 import { 
   CheckCircle2, Download, Share2, 
@@ -13,6 +13,7 @@ import html2canvas from "html2canvas";
 
 export default function TicketPage() {
   const { id } = useParams();
+  const router = useRouter();
   const [ticket, setTicket] = useState<any>(null);
   const [qrUrl, setQrUrl] = useState("");
   const [loading, setLoading] = useState(true);
@@ -130,9 +131,19 @@ export default function TicketPage() {
           </div>
         </div>
 
-        <Link href="/events" className="mt-8 flex items-center justify-center gap-2 text-gray-500 hover:text-white transition-colors text-sm font-bold">
+        <button 
+          type="button"
+          onClick={() => {
+            if (window.history.length > 2) {
+              router.back();
+            } else {
+              router.push("/events");
+            }
+          }}
+          className="mt-8 flex items-center w-full justify-center gap-2 text-gray-500 hover:text-white transition-colors text-sm font-bold cursor-pointer"
+        >
           <ArrowLeft size={16} /> Back to Events
-        </Link>
+        </button>
       </div>
     </div>
   );

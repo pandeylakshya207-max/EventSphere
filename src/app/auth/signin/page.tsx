@@ -4,7 +4,6 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Mail, KeyRound, Loader2, ArrowLeft, User, ShieldCheck } from "lucide-react";
-import Link from "next/link";
 import { toast } from "sonner";
 
 export default function AuthPage() {
@@ -66,9 +65,21 @@ export default function AuthPage() {
       <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1025] to-[#0a0a0a] z-0" />
       <div className="bg-glow absolute inset-0 z-0 opacity-50" />
       
-      <Link href="/" className="absolute top-8 left-8 flex items-center gap-2 text-gray-400 hover:text-white transition-colors z-10">
-        <ArrowLeft size={16} /> Back
-      </Link>
+      <button
+        onClick={() => {
+          // window.history.length > 2 means there's a real page before this one
+          // (length 1 = direct open, length 2 = one prior page which may be external)
+          if (window.history.length > 2) {
+            window.history.back();
+          } else {
+            router.push("/");
+          }
+        }}
+        className="absolute top-24 left-6 sm:left-8 flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-white transition-all duration-200 z-[60] group px-3 py-2 rounded-xl hover:bg-white/8 border border-transparent hover:border-white/10"
+      >
+        <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform duration-200" />
+        Back
+      </button>
 
       <div className="glass-card w-full max-w-md p-8 relative z-10 border-white/10 shadow-2xl shadow-brand-purple/5">
         <div className="text-center mb-8">

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { ChevronLeft, Zap, ShieldCheck, Plus, Minus } from "lucide-react";
+import { ArrowLeft, Zap, ShieldCheck, Plus, Minus } from "lucide-react";
 import Link from "next/link";
 
 export default function CheckoutPage() {
@@ -55,7 +55,7 @@ export default function CheckoutPage() {
       const orderRes = await fetch("/api/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: totalAmount }),
+        body: JSON.stringify({ eventId: id, tierId: tier.id, quantity }),
       });
 
       const orderData = await orderRes.json();
@@ -84,9 +84,6 @@ export default function CheckoutPage() {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
-              eventId: id,
-              tierId: tier.id,
-              quantity: quantity, // Pass quantity to generate multiple tickets
             }),
           });
 
@@ -126,11 +123,22 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-dark-bg p-4 sm:p-12 relative overflow-hidden w-full">
       <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1025] to-[#0a0a0a] z-0" />
       <div className="bg-glow absolute inset-0 z-0 opacity-50" />
-      
-      <div className="max-w-4xl mx-auto relative z-10">
-        <Link href={`/events/${id}`} className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors">
-          <ChevronLeft size={20} /> Back to Event
-        </Link>
+      <button
+        type="button"
+        onClick={() => {
+          if (window.history.length > 2) {
+            router.back();
+          } else {
+            router.push(`/events/${id}`);
+          }
+        }}
+        className="absolute top-24 left-6 sm:left-8 flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-white transition-all duration-200 z-[60] group px-3 py-2 rounded-xl hover:bg-white/8 border border-transparent hover:border-white/10 cursor-pointer"
+      >
+        <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform duration-200" />
+        Back to Event
+      </button>
+
+      <div className="max-w-4xl mx-auto relative z-10 pt-16">
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Order Details */}

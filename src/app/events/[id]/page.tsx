@@ -59,14 +59,28 @@ export default function EventDetailPage() {
   if (!event) return <div className="min-h-screen bg-dark-bg flex items-center justify-center text-white">Event not found</div>;
 
   return (
-    <div className="min-h-screen bg-dark-bg p-4 sm:p-12 relative overflow-hidden w-full">
+    <div className="min-h-screen bg-dark-bg relative overflow-hidden w-full">
       <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1025] to-[#0a0a0a] z-0" />
       <div className="bg-glow absolute inset-0 z-0 opacity-50" />
       
-      <div className="max-w-7xl mx-auto relative z-10">
-        <Link href="/events" className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors">
-          <ChevronLeft size={20} /> Back to Experiences
-        </Link>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-28 pb-24">
+        <button
+          type="button"
+          onClick={() => {
+            if (window.history.length > 2) {
+              router.back();
+            } else {
+              router.push("/events");
+            }
+          }}
+          className="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-white mb-10 transition-all duration-200 group px-4 py-2.5 rounded-xl hover:bg-white/8 border border-transparent hover:border-white/10 w-fit cursor-pointer"
+        >
+          <ChevronLeft
+            size={18}
+            className="group-hover:-translate-x-0.5 transition-transform duration-200 text-brand-purple"
+          />
+          Back to Experiences
+        </button>
 
         {/* Hero Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
