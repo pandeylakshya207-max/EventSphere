@@ -74,14 +74,14 @@ export default function EventDetailPage() {
 
         {/* Hero Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-          <div className="relative aspect-video rounded-[2.5rem] overflow-hidden border border-white/10 group shadow-2xl shadow-brand-purple/10">
+          <div className="relative aspect-video rounded-[2.5rem] overflow-hidden border border-white/10 group shadow-2xl shadow-brand-purple/10 bg-white/5">
             <img 
-              src={event.image || "https://images.unsplash.com/photo-1514525253361-bee8718a300a?q=80&w=1000&auto=format&fit=crop"} 
+              src={event.image} 
               alt={event.title} 
-              onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1514525253361-bee8718a300a?q=80&w=1000&auto=format&fit=crop" }}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1600&auto=format&fit=crop" }}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-dark-bg via-transparent to-transparent opacity-80" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
           </div>
 
           <div className="flex flex-col justify-center">
@@ -92,6 +92,12 @@ export default function EventDetailPage() {
               <span className="px-4 py-1.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan text-xs font-bold uppercase tracking-wider">
                 {event.category}
               </span>
+              {event.date === new Date().toISOString().split('T')[0] && (
+                 <div className="live-indicator">
+                    <div className="live-dot" />
+                    Live Now
+                 </div>
+              )}
             </div>
             
             <h1 className="text-5xl md:text-6xl font-black mb-6 leading-tight text-white">

@@ -40,11 +40,11 @@ export const mockEvents: Event[] = [
     title: "Celestial Beats: Midnight Rooftop Rave",
     performer: "DJ Solar & Luna",
     description: "An immersive rooftop experience featuring panoramic city views, high-fidelity sound, and a curated selection of visual arts. Join us for a night where house music meets the stars.",
-    date: "2026-05-15",
-    time: "22:00",
+    date: new Date().toISOString().split('T')[0],
+    time: "20:00",
     venue: "Skyline Terrace, Mumbai",
     category: "Music",
-    image: "https://images.unsplash.com/photo-1514525253361-bee8718a300a?q=80&w=1000",
+    image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1600&auto=format&fit=crop",
     organizerId: "org_1",
     tiers: [
       { id: "tier_1_1", name: "Early Bird", price: 1500, capacity: 50 },
@@ -61,7 +61,7 @@ export const mockEvents: Event[] = [
     time: "20:00",
     venue: "The Cellar, Bengaluru",
     category: "Standup Comedy",
-    image: "https://images.unsplash.com/photo-1585699324551-f6c309eedee6?q=80&w=1000",
+    image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=1600&auto=format&fit=crop",
     organizerId: "org_2",
     tiers: [
       { id: "tier_2_1", name: "Premium Seating", price: 1200, capacity: 40 },
@@ -78,7 +78,7 @@ export const mockEvents: Event[] = [
     time: "10:00",
     venue: "Innovation Hub, Hyderabad",
     category: "Tech Meetups",
-    image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=1000",
+    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1600&auto=format&fit=crop",
     organizerId: "org_3",
     tiers: [
       { id: "tier_3_1", name: "Full Access Pass", price: 5000, capacity: 100 }
@@ -94,7 +94,7 @@ export const mockEvents: Event[] = [
     time: "14:00",
     venue: "Studio 44, New Delhi",
     category: "Workshops",
-    image: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?q=80&w=1000",
+    image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=1600&auto=format&fit=crop",
     organizerId: "org_4",
     tiers: [
       { id: "tier_4_1", name: "Workshop Bundle", price: 3500, capacity: 25 }
@@ -110,7 +110,7 @@ export const mockEvents: Event[] = [
     time: "19:00",
     venue: "Canvas Gallery, Goa",
     category: "Art & Media",
-    image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000",
+    image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1600&auto=format&fit=crop",
     organizerId: "org_1",
     tiers: [
       { id: "tier_5_1", name: "Guest List", price: 0, capacity: 100 }

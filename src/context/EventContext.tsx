@@ -8,9 +8,11 @@ interface EventContextType {
   tickets: Ticket[];
   addEvent: (event: Omit<Event, "id" | "createdAt" | "organizerId">) => Event;
   getEventById: (id: string) => Event | undefined;
+  getSurpriseEvent: () => Event | undefined;
   bookTicket: (eventId: string, tierId: string, userId: string, quantity: number) => Ticket[];
   getTicketsByUserId: (userId: string) => Ticket[];
   getTicketById: (id: string) => Ticket | undefined;
+  getEventsByOrganizerId: (userId: string) => Event[];
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined);
@@ -100,15 +102,27 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
       return ticket;
   };
 
+  const getSurpriseEvent = () => {
+    if (events.length === 0) return undefined;
+    const randomIndex = Math.floor(Math.random() * events.length);
+    return events[randomIndex];
+  };
+
+  const getEventsByOrganizerId = (userId: string) => {
+    return events.filter(e => e.organizerId === userId);
+  };
+
   return (
     <EventContext.Provider value={{ 
         events, 
         tickets, 
         addEvent, 
         getEventById, 
+        getSurpriseEvent,
         bookTicket, 
         getTicketsByUserId,
-        getTicketById
+        getTicketById,
+        getEventsByOrganizerId
     }}>
       {children}
     </EventContext.Provider>

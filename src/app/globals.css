@@ -68,6 +68,18 @@ body {
   text-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
 }
 
+.shimmer-text {
+  background: linear-gradient(90deg, #fff 0%, #8b5cf6 50%, #fff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-text 3s linear infinite;
+}
+
+@keyframes shimmer-text {
+  to { background-position: 200% center; }
+}
+
 /* ─── Enhanced Glassmorphism ─────────────────────────────── */
 .glass-effect {
   background: rgba(255, 255, 255, 0.03);
@@ -81,37 +93,79 @@ body {
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 28px;
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5), 0 18px 36px -18px rgba(139, 92, 246, 0.1);
 }
 
 /* ─── Buttons ────────────────────────────────────────────── */
 .btn-premium {
   position: relative;
   overflow: hidden;
-  padding: 0.875rem 2rem;
+  padding: 1rem 2.5rem;
   border-radius: 9999px;
-  font-weight: 700;
-  transition: all 0.3s ease;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
   background: linear-gradient(135deg, #8b5cf6 0%, #22d3ee 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 10px 20px -5px rgba(139, 92, 246, 0.4);
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
 .btn-premium:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
-  filter: brightness(1.1);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 15px 30px -10px rgba(139, 92, 246, 0.6);
+  filter: brightness(1.15);
+}
+
+/* ─── Custom Utilities ───────────────────────────────────── */
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; filter: blur(40px); }
+  50% { opacity: 0.9; filter: blur(60px); }
+}
+
+.live-indicator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 99px;
+  color: #ef4444;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  background: #ef4444;
+  border-radius: 50%;
+  animation: live-blink 1s ease-in-out infinite;
+}
+
+@keyframes live-blink {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.4; }
 }
 
 /* Primary button — solid brand purple */

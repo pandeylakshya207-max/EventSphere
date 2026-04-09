@@ -36,7 +36,7 @@ export function Navbar() {
     ...(session
       ? [
         { href: "/create-event", label: "Host Event", icon: Plus },
-        { href: "/tickets", label: "My Tickets", icon: Ticket },
+        { href: "/dashboard", label: "Dashboard", icon: Ticket },
       ]
       : []),
   ];

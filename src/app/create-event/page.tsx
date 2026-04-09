@@ -9,6 +9,7 @@ import {
 import Link from "next/link";
 import { toast } from "sonner";
 import { useEvents } from "@/context/EventContext";
+import { motion } from "framer-motion";
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -51,7 +52,6 @@ export default function CreateEventPage() {
     };
 
     try {
-      // Direct call to context
       const newEvent = addEvent(eventData);
       toast.success("Experience Launched! 🚀");
       router.push(`/events/${newEvent.id}`);
@@ -63,12 +63,12 @@ export default function CreateEventPage() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-bg p-4 sm:p-8 relative">
-      <div className="bg-glow" />
+    <div className="min-h-screen bg-dark-bg p-4 sm:p-8 relative overflow-hidden">
+      <div className="mesh-gradient opacity-20" />
       
-      <div className="max-w-4xl mx-auto relative z-10 pt-20">
-        <Link href="/events" className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors">
-          <ArrowLeft size={18} /> Back to Discover
+      <div className="max-w-4xl mx-auto relative z-10 pt-28">
+        <Link href="/dashboard" className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-10 transition-colors font-bold text-sm">
+          <ArrowLeft size={18} className="text-brand-purple" /> Back to Dashboard
         </Link>
 
         <h1 className="text-4xl font-black mb-2 text-white">Create new <span className="text-gradient">Experience</span></h1>
