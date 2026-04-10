@@ -9,15 +9,18 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useEvents } from "@/context/EventContext";
 
 export default function OrganiserDashboard() {
   const { data: session } = useSession();
+  const { currentUser } = useEvents();
+  const user = currentUser || session?.user;
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+  }, [user]);
 
   const fetchEvents = async () => {
     try {
@@ -53,7 +56,7 @@ export default function OrganiserDashboard() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <h1 className="text-4xl font-black text-white mb-2">Organiser <span className="text-gradient">Console</span></h1>
-            <p className="text-gray-400">Welcome back, {(session?.user as any)?.name || 'Organiser'}</p>
+            <p className="text-gray-400">Welcome back, {(user as any)?.name || 'Organiser'}</p>
           </div>
           <Link href="/organiser/create" className="btn-primary flex items-center gap-2 self-start md:self-center py-3 px-6">
             <Plus size={20} /> Launch New Experience

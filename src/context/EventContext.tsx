@@ -13,6 +13,13 @@ interface EventContextType {
   getTicketsByUserId: (userId: string) => Ticket[];
   getTicketById: (id: string) => Ticket | undefined;
   getEventsByOrganizerId: (userId: string) => Event[];
+  wishlist: string[];
+  toggleWishlist: (eventId: string) => void;
+  checkInTicket: (ticketId: string) => boolean;
+  currentUser: any | null;
+  login: (user: any) => void;
+  logout: () => void;
+  updateUser: (data: any) => void;
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined);
@@ -20,12 +27,16 @@ const EventContext = createContext<EventContextType | undefined>(undefined);
 export function EventProvider({ children }: { children: React.ReactNode }) {
   const [events, setEvents] = useState<Event[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [initialized, setInitialized] = useState(false);
 
   // Load from localStorage
   useEffect(() => {
     const storedEvents = localStorage.getItem("es_events");
     const storedTickets = localStorage.getItem("es_tickets");
+    const storedWishlist = localStorage.getItem("es_wishlist");
+    const storedUser = localStorage.getItem("es_user");
 
     if (storedEvents) {
       setEvents(JSON.parse(storedEvents));
@@ -36,6 +47,15 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     if (storedTickets) {
       setTickets(JSON.parse(storedTickets));
     }
+    
+    if (storedWishlist) {
+      setWishlist(JSON.parse(storedWishlist));
+    }
+
+    if (storedUser) {
+      setCurrentUser(JSON.parse(storedUser));
+    }
+
     setInitialized(true);
   }, []);
 
@@ -44,8 +64,32 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     if (initialized) {
       localStorage.setItem("es_events", JSON.stringify(events));
       localStorage.setItem("es_tickets", JSON.stringify(tickets));
+      localStorage.setItem("es_wishlist", JSON.stringify(wishlist));
+      if (currentUser) {
+        localStorage.setItem("es_user", JSON.stringify(currentUser));
+      } else {
+        localStorage.removeItem("es_user");
+      }
     }
-  }, [events, tickets, initialized]);
+  }, [events, tickets, wishlist, currentUser, initialized]);
+
+  const login = (user: any) => {
+    setCurrentUser(user);
+    localStorage.setItem("es_user", JSON.stringify(user));
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem("es_user");
+  };
+
+  const updateUser = (data: any) => {
+    if (currentUser) {
+      const updated = { ...currentUser, ...data };
+      setCurrentUser(updated);
+      localStorage.setItem("es_user", JSON.stringify(updated));
+    }
+  };
 
   const addEvent = (eventData: Omit<Event, "id" | "createdAt" | "organizerId">) => {
     const newEvent: Event = {
@@ -112,6 +156,24 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     return events.filter(e => e.organizerId === userId);
   };
 
+  const toggleWishlist = (eventId: string) => {
+    setWishlist(prev => 
+      prev.includes(eventId) ? prev.filter(id => id !== eventId) : [...prev, eventId]
+    );
+  };
+
+  const checkInTicket = (ticketId: string) => {
+    let success = false;
+    setTickets(prev => prev.map(t => {
+      if (t.id === ticketId || t.qrCode === ticketId) {
+        success = true;
+        return { ...t, checkedIn: true };
+      }
+      return t;
+    }));
+    return success;
+  };
+
   return (
     <EventContext.Provider value={{ 
         events, 
@@ -122,7 +184,14 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
         bookTicket, 
         getTicketsByUserId,
         getTicketById,
-        getEventsByOrganizerId
+        getEventsByOrganizerId,
+        wishlist,
+        toggleWishlist,
+        checkInTicket,
+        currentUser,
+        login,
+        logout,
+        updateUser
     }}>
       {children}
     </EventContext.Provider>

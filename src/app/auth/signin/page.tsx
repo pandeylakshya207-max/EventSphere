@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Mail, KeyRound, Loader2, ArrowLeft, User, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+import { useEvents } from "@/context/EventContext";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -12,6 +13,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { login } = useEvents();
   const router = useRouter();
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -27,6 +29,15 @@ export default function AuthPage() {
       });
 
       if (res?.ok) {
+        // Sync with EventContext for immediate navbar reaction
+        const demoUser = {
+          id: "demo_user_id",
+          name: email.split("@")[0].toUpperCase(),
+          email: email,
+          role: email.toLowerCase().includes("organiser") ? "ORGANISER" : "ATTENDEE"
+        };
+        login(demoUser);
+        
         toast.success("Successfully signed in!");
         router.push("/events");
       } else {

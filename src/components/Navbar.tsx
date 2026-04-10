@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Ticket,
   User,
@@ -11,12 +11,23 @@ import {
   Menu,
   X,
   Plus,
+  LayoutDashboard,
+  Settings,
+  ChevronDown,
+  ShieldCheck
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEvents } from "@/context/EventContext";
 
 export function Navbar() {
   const { data: session } = useSession();
+  const { currentUser, logout } = useEvents();
+  const user = currentUser || session?.user;
+  const isLoggedIn = !!user;
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   /* ── Scroll listener ─────────────────────────────── */
   useEffect(() => {
@@ -25,18 +36,29 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* ── Close dropdown on click outside ──────────────── */
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   /* ── Close mobile menu on route change ───────────── */
   useEffect(() => {
     setMobileOpen(false);
   }, []);
 
-  // ✅ FIXED: removed role restriction
   const navLinks = [
     { href: "/events", label: "Discover", icon: Globe },
-    ...(session
+    ...(isLoggedIn
       ? [
         { href: "/create-event", label: "Host Event", icon: Plus },
-        { href: "/dashboard", label: "Dashboard", icon: Ticket },
+        { href: "/tickets", label: "My Tickets", icon: Ticket },
+        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       ]
       : []),
   ];
@@ -73,9 +95,9 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-6">
             {navLinks.map(({ href, label, icon: Icon }) => (
               <Link
-                key={href}
+                key={label}
                 href={href}
-                className="text-sm font-semibold text-gray-400 hover:text-white flex items-center gap-2"
+                className="text-sm font-semibold text-gray-400 hover:text-white flex items-center gap-2 transition-colors"
               >
                 <Icon size={16} />
                 {label}
@@ -86,25 +108,77 @@ export function Navbar() {
           {/* Right Side */}
           <div className="flex items-center gap-2 md:gap-3">
 
-            {session ? (
-              <>
-                {/* Avatar */}
-                <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-brand-purple/20 border border-brand-purple/40 flex items-center justify-center text-brand-purple-light text-sm font-bold">
-                  {session.user?.name?.[0]?.toUpperCase() ?? <User size={14} />}
-                </div>
-
-                {/* Logout */}
+            {isLoggedIn ? (
+              <div className="relative" ref={dropdownRef}>
+                {/* User Trigger */}
                 <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  className="hidden md:flex p-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-red-400"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 border border-white/10 hover:border-brand-purple/50 transition-all"
                 >
-                  <LogOut size={16} />
+                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-brand-purple/20 flex items-center justify-center text-brand-purple-light text-sm font-bold shadow-inner">
+                    {user?.name?.[0]?.toUpperCase() ?? <User size={14} />}
+                  </div>
+                  <ChevronDown size={14} className={`text-gray-500 transition-transform duration-300 ${dropdownOpen ? "rotate-180" : ""}`} />
                 </button>
-              </>
+
+                {/* Account Dropdown */}
+                <AnimatePresence>
+                  {dropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-3 w-64 glass-card p-2 border-white/10 shadow-2xl z-50 origin-top-right overflow-hidden"
+                    >
+                      {/* User Info */}
+                      <div className="p-4 border-b border-white/5 mb-2 bg-white/5 rounded-t-lg">
+                        <div className="font-black text-white text-sm line-clamp-1">{user?.name}</div>
+                        <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1 mt-1">
+                          <ShieldCheck size={10} className="text-brand-cyan" />
+                          {user?.role || "Explorer"}
+                        </div>
+                      </div>
+
+                      {/* Menu Items */}
+                      <div className="space-y-1">
+                        <Link 
+                          href="/account" 
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-all group"
+                        >
+                          <User size={16} className="group-hover:text-brand-purple transition-colors" />
+                          View Profile
+                        </Link>
+                        <Link 
+                          href="/dashboard" 
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-all group"
+                        >
+                          <Settings size={16} className="group-hover:text-brand-cyan transition-colors" />
+                          Organiser Hub
+                        </Link>
+                        
+                        <div className="h-px bg-white/5 my-2" />
+                        
+                        <button
+                          onClick={() => {
+                            logout();
+                            signOut({ callbackUrl: "/" });
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-500/80 hover:text-red-500 hover:bg-red-500/5 transition-all group"
+                        >
+                          <LogOut size={16} />
+                          Sign Out
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             ) : (
               <Link
                 href="/auth/signin"
-                className="px-3 py-1.5 md:px-5 md:py-2 text-sm rounded-lg bg-brand-purple text-white font-semibold"
+                className="px-3 py-1.5 md:px-5 md:py-2 text-sm rounded-lg bg-brand-purple text-white font-semibold transition-all hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]"
               >
                 Sign In
               </Link>
@@ -122,60 +196,88 @@ export function Navbar() {
       </nav>
 
       {/* Mobile Drawer */}
-      <div
-        className={[
-          "fixed inset-x-0 z-40 md:hidden transition-all duration-300",
-          mobileOpen
-            ? "top-14 opacity-100"
-            : "top-14 opacity-0 pointer-events-none -translate-y-2",
-        ].join(" ")}
-      >
-        <div className="mx-4 mt-2 rounded-xl bg-black/90 border border-white/10 shadow-lg">
-          <div className="p-3 space-y-1">
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="fixed inset-x-0 top-14 z-40 md:hidden bg-black/95 backdrop-blur-2xl border-b border-white/10 overflow-hidden shadow-2xl"
+          >
+            <div className="p-6 space-y-6">
+              {/* User Section Mobile */}
+              {isLoggedIn && (
+                <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10">
+                   <div className="w-12 h-12 rounded-xl bg-brand-purple/20 flex items-center justify-center text-brand-purple-light text-lg font-black">
+                      {user?.name?.[0]}
+                   </div>
+                   <div>
+                      <div className="font-bold text-white">{user?.name}</div>
+                      <div className="text-xs text-gray-500">{user?.email}</div>
+                   </div>
+                </div>
+              )}
 
-            {navLinks.map(({ href, label, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-300 hover:text-white hover:bg-white/10"
-              >
-                <Icon size={18} />
-                {label}
-              </Link>
-            ))}
+              {/* Links */}
+              <div className="grid grid-cols-1 gap-2">
+                {navLinks.map(({ href, label, icon: Icon }) => (
+                  <Link
+                    key={label}
+                    href={href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-4 px-4 py-3 rounded-xl text-base font-bold text-gray-300 hover:text-white hover:bg-white/5 transition-all"
+                  >
+                    <Icon size={20} className="text-brand-cyan" />
+                    {label}
+                  </Link>
+                ))}
+              </div>
 
-            {session && (
-              <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className="w-full flex items-center gap-3 px-3 py-2 text-red-400"
-              >
-                <LogOut size={18} />
-                Sign Out
-              </button>
-            )}
+              {isLoggedIn && (
+                <div className="space-y-2 pt-4 border-t border-white/5">
+                  <Link
+                    href="/account"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-4 px-4 py-3 rounded-xl text-base font-bold text-gray-400 hover:text-white transition-all"
+                  >
+                    <User size={20} />
+                    Account Settings
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      signOut({ callbackUrl: "/" });
+                    }}
+                    className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-base font-bold text-red-500/80 hover:text-red-500 hover:bg-red-500/5 transition-all"
+                  >
+                    <LogOut size={20} />
+                    Sign Out
+                  </button>
+                </div>
+              )}
 
-            {!session && (
-              <Link
-                href="/auth/signin"
-                className="block w-full text-center mt-2 px-4 py-2 rounded-lg bg-brand-purple text-white"
-              >
-                Sign In
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
+              {!isLoggedIn && (
+                <Link
+                  href="/auth/signin"
+                  className="block w-full text-center py-4 rounded-2xl bg-brand-purple text-white font-black uppercase tracking-widest shadow-lg shadow-brand-purple/30"
+                >
+                  Join EventSphere
+                </Link>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Mobile Sticky CTA */}
-      {session && (
+      {isLoggedIn && (
         <div className="fixed bottom-4 left-4 right-4 md:hidden z-50">
           <Link
             href="/create-event"
-            className="flex items-center justify-center gap-2 bg-brand-purple text-white py-3 rounded-xl shadow-lg"
+            className="flex items-center justify-center gap-3 bg-brand-purple text-white py-4 rounded-2xl shadow-2xl shadow-brand-purple/40 font-black uppercase tracking-widest text-xs border border-white/10"
           >
-            <Plus size={18} />
-            Host Event
+            <Plus size={20} />
+            Create Event
           </Link>
         </div>
       )}

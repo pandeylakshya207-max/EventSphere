@@ -20,6 +20,9 @@ export interface Event {
   createdAt: string;
   price?: number;
   capacity?: number;
+  discountCodes?: { code: string; discountPercent: number; expiresAt?: string }[];
+  agenda?: { time: string; title: string; description?: string }[];
+  faq?: { question: string; answer: string }[];
 }
 
 export interface Ticket {
@@ -30,6 +33,7 @@ export interface Ticket {
   qrCode: string;
   status: string;
   createdAt: string;
+  checkedIn?: boolean;
   event?: Event;
   tier?: TicketTier;
 }
@@ -49,6 +53,17 @@ export const mockEvents: Event[] = [
     tiers: [
       { id: "tier_1_1", name: "Early Bird", price: 1500, capacity: 50 },
       { id: "tier_1_2", name: "General Admission", price: 2500, capacity: 200 }
+    ],
+    discountCodes: [
+      { code: "HACKATHON20", discountPercent: 20 }
+    ],
+    agenda: [
+      { time: "20:00", title: "Doors Open & Warm-up Set", description: "Grab a drink and vibe to early house tracks." },
+      { time: "22:00", title: "DJ Solar (Headliner)", description: "Main set featuring new unreleased tracks." }
+    ],
+    faq: [
+      { question: "Is there parking available?", answer: "Yes, valet parking is available at the venue." },
+      { question: "Are drinks included?", answer: "Drinks are standard pay-at-bar unless you purchase VIP." }
     ],
     createdAt: new Date().toISOString()
   },

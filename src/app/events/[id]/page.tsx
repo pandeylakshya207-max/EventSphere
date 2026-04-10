@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { 
   Calendar, MapPin, Clock, Info, 
   ChevronLeft, Share2, ShieldCheck, Zap,
-  ArrowRight
+  ArrowRight, Heart, List, HelpCircle
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -16,7 +16,7 @@ export default function EventDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const { data: session } = useSession();
-  const { getEventById } = useEvents();
+  const { getEventById, wishlist, toggleWishlist } = useEvents();
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
@@ -71,6 +71,15 @@ export default function EventDetailPage() {
           />
           Back to Experiences
         </button>
+
+        <div className="absolute top-28 right-8 z-20 flex gap-4">
+          <button 
+            onClick={() => toggleWishlist(id as string)}
+            className="glass-card p-3 rounded-full hover:bg-white/10 transition-colors group border-white/10"
+          >
+             <Heart size={20} className={`transition-colors ${wishlist.includes(id as string) ? 'fill-red-500 text-red-500' : 'text-gray-400 group-hover:text-red-400'}`} />
+          </button>
+        </div>
 
         {/* Hero Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
@@ -151,6 +160,56 @@ export default function EventDetailPage() {
                   </div>
                 ))}
               </div>
+            </section>
+
+            {event.agenda && event.agenda.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-black mb-6 flex items-center gap-3 text-white">
+                  <List className="text-brand-cyan" /> Event Agenda
+                </h2>
+                <div className="space-y-4">
+                  {event.agenda.map((item: any, i: number) => (
+                    <div key={i} className="glass-card p-6 border-white/5 flex flex-col md:flex-row gap-4 items-start md:items-center">
+                      <div className="px-4 py-2 bg-brand-cyan/10 border border-brand-cyan/20 rounded-xl text-brand-cyan font-black text-sm w-fit">
+                        {item.time}
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-bold text-white mb-1">{item.title}</h4>
+                        {item.description && <p className="text-sm text-gray-400">{item.description}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {event.faq && event.faq.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-black mb-6 flex items-center gap-3 text-white">
+                  <HelpCircle className="text-green-400" /> FAQ
+                </h2>
+                <div className="space-y-4">
+                  {event.faq.map((item: any, i: number) => (
+                    <div key={i} className="glass-card p-6 border-white/5">
+                      <h4 className="text-md font-bold text-white mb-2">{item.question}</h4>
+                      <p className="text-sm text-gray-400">{item.answer}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+            
+            <section>
+               <h2 className="text-2xl font-black mb-6 flex items-center gap-3 text-white">
+                  <MapPin className="text-pink-400" /> Venue Map
+               </h2>
+               <div className="w-full h-64 rounded-2xl overflow-hidden glass-card border-white/5 relative">
+                  <div className="absolute inset-0 bg-white/5 flex flex-col items-center justify-center text-gray-500">
+                     <MapPin size={48} className="mb-4 opacity-50" />
+                     <p className="font-bold uppercase tracking-widest text-xs">Map Integration Placeholder</p>
+                     <p className="text-xs">{event.venue}</p>
+                  </div>
+               </div>
             </section>
           </div>
 

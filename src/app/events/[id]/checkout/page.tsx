@@ -24,6 +24,8 @@ function CheckoutContent() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [generatedTickets, setGeneratedTickets] = useState<any[]>([]);
+  const [discountCode, setDiscountCode] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState<any>(null);
 
   useEffect(() => {
     if (!session) {
@@ -39,6 +41,21 @@ function CheckoutContent() {
     }
     setLoading(false);
   }, [id, tierId, session, router, getEventById]);
+
+  const applyDiscount = () => {
+    if (!event || !event.discountCodes) {
+       toast.error("Invalid discount code");
+       return;
+    }
+    const found = event.discountCodes.find((d: any) => d.code.toUpperCase() === discountCode.toUpperCase());
+    if (found) {
+      setAppliedDiscount(found);
+      toast.success(`${found.discountPercent}% Discount Applied!`);
+    } else {
+      toast.error("Invalid discount code");
+      setAppliedDiscount(null);
+    }
+  };
 
   const handlePayment = async () => {
     if (!tier) return;
@@ -64,6 +81,10 @@ function CheckoutContent() {
 
   if (loading) return <div className="min-h-screen bg-dark-bg flex items-center justify-center"><Zap className="animate-spin text-brand-purple" size={48} /></div>;
   if (!event || !tier) return <div className="min-h-screen bg-dark-bg flex items-center justify-center text-white">Event or Tier not found</div>;
+
+  const subtotal = tier.price * quantity;
+  const discountAmount = appliedDiscount ? (subtotal * (appliedDiscount.discountPercent / 100)) : 0;
+  const total = subtotal - discountAmount;
 
   return (
     <div className="min-h-screen bg-dark-bg p-4 sm:p-12 relative overflow-hidden w-full">
@@ -186,15 +207,33 @@ function CheckoutContent() {
             <div className="space-y-4 mb-8 text-sm">
               <div className="flex justify-between text-gray-400 font-medium">
                 <span>{quantity}x {tier.name}</span>
-                <span className="text-white">₹{tier.price * quantity}</span>
+                <span className="text-white">₹{subtotal}</span>
               </div>
               <div className="flex justify-between text-gray-400 font-medium">
                 <span>Processing Fee</span>
                 <span className="text-brand-cyan">FREE (Demo)</span>
               </div>
-              <div className="flex justify-between font-black text-2xl text-white pt-6 border-t border-white/5">
+              
+              {appliedDiscount && (
+                <div className="flex justify-between text-brand-purple font-bold">
+                  <span>Discount ({appliedDiscount.discountPercent}%)</span>
+                  <span>-₹{discountAmount}</span>
+                </div>
+              )}
+
+              <div className="py-4 border-y border-white/5 flex gap-2">
+                 <input 
+                   placeholder="Discount Code" 
+                   value={discountCode}
+                   onChange={e => setDiscountCode(e.target.value)}
+                   className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 w-full text-xs outline-none text-white uppercase font-bold"
+                 />
+                 <button onClick={applyDiscount} className="bg-brand-purple/20 hover:bg-brand-purple/40 text-brand-purple px-4 py-2 rounded-xl text-xs font-bold transition-colors">Apply</button>
+              </div>
+
+              <div className="flex justify-between font-black text-2xl text-white pt-2">
                 <span>Total</span>
-                <span className="text-gradient">₹{tier.price * quantity}</span>
+                <span className="text-gradient">₹{total}</span>
               </div>
             </div>
 
@@ -205,7 +244,7 @@ function CheckoutContent() {
             >
               {bookingLoading ? <Zap className="animate-spin" /> : (
                 <>
-                  Pay ₹{tier.price * quantity}
+                  Pay ₹{total}
                   <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                 </>
               )}
