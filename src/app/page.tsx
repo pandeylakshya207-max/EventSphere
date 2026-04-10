@@ -112,13 +112,12 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
            {trendingEvents.map((event, idx) => (
-             <motion.div 
-               key={event.id}
-               initial={{ opacity: 0, y: 20 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ delay: 0.1 * idx }}
-             >
-               <Link href={`/events/${event.id}`}>
+             <Link key={event.id} href={`/events/${event.id}`}>
+               <motion.div 
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ delay: 0.1 * idx }}
+               >
                  <div className="group glass-card overflow-hidden">
                     <div className="relative w-full h-64 overflow-hidden rounded-t-xl bg-white/5">
                       <img 
@@ -133,25 +132,25 @@ export default function Home() {
                       />
                     </div>
                       
-                      {/* Gradient Overlay for Readability */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
-                      
-                      {event.date === new Date().toISOString().split('T')[0] && (
-                         <div className="absolute top-4 left-4 z-20">
-                            <div className="live-indicator">
-                               <div className="live-dot" />
-                               Live Now
-                            </div>
-                         </div>
-                      )}
+                    {/* Gradient Overlay for Readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
+                    
+                    {event.date === new Date().toISOString().split('T')[0] && (
+                       <div className="absolute top-4 left-4 z-20">
+                          <div className="live-indicator">
+                             <div className="live-dot" />
+                             Live Now
+                          </div>
+                       </div>
+                    )}
 
-                      <div className="absolute bottom-4 left-4 right-4 text-white z-20">
-                         <span className="text-[10px] font-black uppercase tracking-widest text-brand-cyan mb-1 block">{event.category}</span>
-                         <h3 className="text-xl font-bold line-clamp-1 group-hover:text-brand-cyan transition-colors">{event.title}</h3>
-                      </div>
+                    <div className="absolute bottom-4 left-4 right-4 text-white z-20">
+                       <span className="text-[10px] font-black uppercase tracking-widest text-brand-cyan mb-1 block">{event.category}</span>
+                       <h3 className="text-xl font-bold line-clamp-1 group-hover:text-brand-cyan transition-colors">{event.title}</h3>
                     </div>
-               </Link>
-             </motion.div>
+                 </div>
+               </motion.div>
+             </Link>
            ))}
         </div>
       </section>
