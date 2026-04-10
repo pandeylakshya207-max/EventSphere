@@ -6,7 +6,6 @@ import {
   ChevronRight, Download, Zap, Globe, Search, Filter as FilterIcon, Clock
 } from "lucide-react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEvents } from "@/lib/dummyHooks";
 import { toast } from "sonner";
