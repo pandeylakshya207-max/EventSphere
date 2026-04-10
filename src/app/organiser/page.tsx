@@ -114,9 +114,12 @@ export default function OrganiserDashboard() {
                         <div className="w-12 h-12 rounded-lg bg-white/10 overflow-hidden flex-shrink-0 relative">
                           <div className="absolute inset-0 bg-dark-bg/20 z-10" />
                           <img 
-                            src={event.image || "https://images.unsplash.com/photo-1514525253361-bee8718a300a?q=80&w=1000&auto=format&fit=crop"} 
+                            src={event.image || "/fallback.jpg"} 
                             alt={event.title || ""} 
-                            onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1514525253361-bee8718a300a?q=80&w=1000&auto=format&fit=crop" }}
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = "/fallback.jpg";
+                            }}
                             className="w-full h-full object-cover" 
                           />
                         </div>

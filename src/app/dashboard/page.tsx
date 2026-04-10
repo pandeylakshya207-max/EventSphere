@@ -155,11 +155,12 @@ export default function DashboardPage() {
                         key={event.id}
                         className="glass-card overflow-hidden group border-white/5 hover:border-brand-purple/40 transition-all duration-500 shadow-2xl hover:shadow-brand-purple/10 flex flex-col"
                       >
-                         <div className="relative h-40 overflow-hidden bg-white/5 flex-shrink-0">
+                         <div className="relative w-full h-40 overflow-hidden rounded-t-xl bg-white/5 flex-shrink-0">
                             <img 
-                              src={event.image || "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1600&auto=format&fit=crop"} 
+                              src={event.image || "/fallback.jpg"} 
                               onError={(e: any) => {
-                                e.currentTarget.src = "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1600&auto=format&fit=crop";
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = "/fallback.jpg";
                               }}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                               alt={event.title} 
@@ -211,11 +212,12 @@ export default function DashboardPage() {
                          key={event.id}
                          className="glass-card overflow-hidden group border-white/5 hover:border-red-500/40 transition-all duration-500 shadow-2xl hover:shadow-red-500/10 flex flex-col"
                        >
-                          <div className="relative h-40 overflow-hidden bg-white/5 flex-shrink-0">
+                          <div className="relative w-full h-40 overflow-hidden rounded-t-xl bg-white/5 flex-shrink-0">
                              <img 
-                               src={event.image} 
+                               src={event.image || "/fallback.jpg"} 
                                onError={(e: any) => {
-                                 e.currentTarget.src = "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1600&auto=format&fit=crop";
+                                 e.currentTarget.onerror = null;
+                                 e.currentTarget.src = "/fallback.jpg";
                                }}
                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                                alt={event.title} 

@@ -120,16 +120,18 @@ export default function Home() {
              >
                <Link href={`/events/${event.id}`}>
                  <div className="group glass-card overflow-hidden">
-                    <div className="relative h-64 overflow-hidden bg-white/5">
+                    <div className="relative w-full h-64 overflow-hidden rounded-t-xl bg-white/5">
                       <img 
-                        src={event.image || "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1600&auto=format&fit=crop"} 
+                        src={event.image || "/fallback.jpg"} 
                         alt={event.title} 
-                        onError={e => {
-                          e.currentTarget.src = "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1600&auto=format&fit=crop";
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "/fallback.jpg";
                         }}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
                         loading="lazy"
                       />
+                    </div>
                       
                       {/* Gradient Overlay for Readability */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
@@ -148,7 +150,6 @@ export default function Home() {
                          <h3 className="text-xl font-bold line-clamp-1 group-hover:text-brand-cyan transition-colors">{event.title}</h3>
                       </div>
                     </div>
-                 </div>
                </Link>
              </motion.div>
            ))}
@@ -198,4 +199,3 @@ export default function Home() {
     </main>
   );
 }
-

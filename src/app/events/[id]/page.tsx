@@ -95,11 +95,14 @@ export default function EventDetailPage() {
 
         {/* Hero Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-          <div className="relative aspect-video rounded-[2.5rem] overflow-hidden border border-white/10 group shadow-2xl shadow-brand-purple/10 bg-white/5">
+          <div className="relative w-full aspect-video overflow-hidden rounded-[2.5rem] border border-white/10 group shadow-2xl shadow-brand-purple/10 bg-white/5">
             <img 
-              src={event.image} 
+              src={event.image || "/fallback.jpg"} 
               alt={event.title} 
-              onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1600&auto=format&fit=crop" }}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = "/fallback.jpg";
+              }}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
