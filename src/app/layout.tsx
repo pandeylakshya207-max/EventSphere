@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
-import { EventProvider } from "@/context/EventContext";
+import { LocalToSupabaseMigration } from "@/components/LocalToSupabaseMigration";
 import { Navbar } from "@/components/Navbar";
 import { Toaster } from "sonner";
 
@@ -23,13 +23,13 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <body className={`${outfit.className} bg-dark-bg text-white antialiased min-h-full`}>
         <Providers>
-          <EventProvider>
-            <Navbar />
-            {children}
-            <Toaster theme="dark" position="bottom-right" />
-          </EventProvider>
+          <LocalToSupabaseMigration />
+          <Navbar />
+          {children}
+          <Toaster theme="dark" position="bottom-right" />
         </Providers>
       </body>
     </html>
   );
 }
+

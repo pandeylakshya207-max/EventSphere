@@ -7,9 +7,8 @@ import {
   Users, BarChart3, Plus, Globe, Heart, FileDown, ScanLine, TrendingUp
 } from "lucide-react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEvents } from "@/context/EventContext";
+import { useEvents } from "@/lib/dummyHooks";
 import { toast } from "sonner";
 
 function DashboardSkeleton() {
@@ -26,7 +25,6 @@ function DashboardSkeleton() {
 }
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
   const { getTicketsByUserId, getEventsByOrganizerId, events, tickets: allTickets, wishlist, currentUser } = useEvents();
   const [userTickets, setUserTickets] = useState<any[]>([]);
   const [hostedEvents, setHostedEvents] = useState<any[]>([]);
@@ -35,15 +33,14 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<"hosting" | "saved">("hosting");
 
   useEffect(() => {
-    const user = currentUser || session?.user;
-    if (user) {
-      const userId = (user as any).id || "demo_user_id";
+    if (currentUser) {
+      const userId = (currentUser as any).id;
       setUserTickets(getTicketsByUserId(userId));
       setHostedEvents(getEventsByOrganizerId(userId));
     }
     setSavedEvents(events.filter(e => wishlist.includes(e.id)));
     setLoading(false);
-  }, [session, currentUser, getTicketsByUserId, getEventsByOrganizerId, events, wishlist]);
+  }, [currentUser, getTicketsByUserId, getEventsByOrganizerId, events, wishlist]);
 
   const downloadCSV = (eventId: string, title: string) => {
      const eventTickets = allTickets.filter(t => t.eventId === eventId);
@@ -251,3 +248,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

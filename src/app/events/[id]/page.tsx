@@ -8,30 +8,42 @@ import {
   ArrowRight, Heart, List, HelpCircle
 } from "lucide-react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/components/auth-provider";
 import { toast } from "sonner";
-import { useEvents } from "@/context/EventContext";
+import { useEvents } from "@/lib/dummyHooks";
+import { createClient } from "@/utils/supabase/client";
 
 export default function EventDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
-  const { getEventById, wishlist, toggleWishlist } = useEvents();
+  const { user: supabaseUser } = useAuth();
+  const { wishlist, toggleWishlist } = useEvents();
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [selectedTier, setSelectedTier] = useState<any>(null);
+  const supabase = createClient();
 
   useEffect(() => {
-    const data = getEventById(id as string);
-    if (data) {
-      setEvent(data);
+    async function fetchEvent() {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (data) {
+        setEvent(data);
+      } else {
+        console.error("Event fetch error:", error);
+      }
+      setLoading(false);
     }
-    setLoading(false);
-  }, [id, getEventById]);
+    fetchEvent();
+  }, [id]);
 
   const handleBooking = () => {
-    if (!session) {
+    if (!supabaseUser) {
       router.push(`/auth/signin?callbackUrl=/events/${id}`);
       return;
     }
@@ -259,3 +271,4 @@ export default function EventDetailPage() {
     </div>
   );
 }
+

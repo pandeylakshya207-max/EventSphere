@@ -8,13 +8,11 @@ import {
   Search, Filter
 } from "lucide-react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { useEvents } from "@/context/EventContext";
+import { useEvents } from "@/lib/dummyHooks";
 
 export default function OrganiserDashboard() {
-  const { data: session } = useSession();
   const { currentUser } = useEvents();
-  const user = currentUser || session?.user;
+  const user = currentUser;
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -168,3 +166,4 @@ export default function OrganiserDashboard() {
     </div>
   );
 }
+

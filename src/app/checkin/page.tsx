@@ -7,7 +7,7 @@ import {
   Search, Ticket as TicketIcon, Zap 
 } from "lucide-react";
 import Link from "next/link";
-import { useEvents } from "@/context/EventContext";
+import { useEvents } from "@/lib/dummyHooks";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -143,3 +143,4 @@ export default function CheckinPage() {
     </div>
   );
 }
+

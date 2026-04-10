@@ -2,9 +2,9 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/components/auth-provider";
 import { toast } from "sonner";
-import { useEvents } from "@/context/EventContext";
+import { useEvents } from "@/lib/dummyHooks";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Zap, ShieldCheck, Plus, Minus, CheckCircle, Ticket as TicketIcon, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -14,7 +14,7 @@ function CheckoutContent() {
   const searchParams = useSearchParams();
   const tierId = searchParams.get("tier");
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const { getEventById, bookTicket } = useEvents();
 
   const [event, setEvent] = useState<any>(null);
@@ -28,7 +28,7 @@ function CheckoutContent() {
   const [appliedDiscount, setAppliedDiscount] = useState<any>(null);
 
   useEffect(() => {
-    if (!session) {
+    if (!user) {
       router.push(`/auth/signin?callbackUrl=/events/${id}/checkout?tier=${tierId}`);
       return;
     }
@@ -40,7 +40,7 @@ function CheckoutContent() {
       if (selectedTier) setTier(selectedTier);
     }
     setLoading(false);
-  }, [id, tierId, session, router, getEventById]);
+  }, [id, tierId, user, router, getEventById]);
 
   const applyDiscount = () => {
     if (!event || !event.discountCodes) {
@@ -62,11 +62,16 @@ function CheckoutContent() {
     setBookingLoading(true);
 
     try {
+      if (!user) {
+        toast.error("Please sign in to proceed");
+        return;
+      }
+
       // Direct booking in context for demo
       const newTickets = bookTicket(
         id as string, 
         tier.id, 
-        (session?.user as any).id || "demo_user", 
+        user.id, 
         quantity
       );
       
@@ -263,3 +268,4 @@ export default function CheckoutPage() {
     </Suspense>
   );
 }
+

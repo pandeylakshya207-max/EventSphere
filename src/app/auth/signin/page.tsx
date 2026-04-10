@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Mail, KeyRound, Loader2, ArrowLeft, User, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { useEvents } from "@/context/EventContext";
+import { createClient } from "@/utils/supabase/client";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,54 +12,47 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useEvents();
   const router = useRouter();
+  const supabase = createClient();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     if (isLogin) {
-      // Handle Sign In
-      const res = await signIn("credentials", {
+      // Handle Sign In with Supabase
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        redirect: false,
       });
 
-      if (res?.ok) {
-        // Sync with EventContext for immediate navbar reaction
-        const demoUser = {
-          id: "demo_user_id",
-          name: email.split("@")[0].toUpperCase(),
-          email: email,
-          role: email.toLowerCase().includes("organiser") ? "ORGANISER" : "ATTENDEE"
-        };
-        login(demoUser);
-        
+      if (!error) {
         toast.success("Successfully signed in!");
         router.push("/events");
       } else {
-        toast.error("Invalid credentials. Please try again.");
+        toast.error(error.message || "Invalid credentials. Please try again.");
         setLoading(false);
       }
     } else {
-      // Handle Sign Up
+      // Handle Sign Up with Supabase
       try {
-        const res = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password }),
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: name,
+              role: "ATTENDEE" // Default role
+            }
+          }
         });
 
-        const data = await res.json();
-
-        if (res.ok) {
-          toast.success("Account created! Please sign in.");
+        if (!error) {
+          toast.success("Account created! Please check your email or sign in.");
           setIsLogin(true);
           setPassword("");
         } else {
-          toast.error(data.error || "Failed to create account");
+          toast.error(error.message || "Failed to create account");
         }
       } catch (err) {
         toast.error("Something went wrong");
@@ -177,3 +169,4 @@ export default function AuthPage() {
     </div>
   );
 }
+

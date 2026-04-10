@@ -3,11 +3,11 @@
 import { useState, useRef, useEffect } from "react";
 import { CheckCircle2, XCircle, Scan, ShieldAlert, Zap } from "lucide-react";
 import { toast } from "sonner";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/components/auth-provider";
 import { useRouter } from "next/navigation";
 
 export default function ValidateTicketPage() {
-  const { data: session, status } = useSession();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
   
   const [qrCode, setQrCode] = useState("");
@@ -24,11 +24,10 @@ export default function ValidateTicketPage() {
     // Keep focus on input for hardware scanners
     inputRef.current?.focus();
     
-    // Redirect if not logged in
-    if (status === "unauthenticated") {
+    if (!isLoading && !user) {
       router.push("/auth/signin?callbackUrl=/admin/validate");
     }
-  }, [status, router]);
+  }, [isLoading, user, router]);
 
   const handleScan = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -62,7 +61,7 @@ export default function ValidateTicketPage() {
     }
   };
 
-  if (status === "loading") return <div className="min-h-screen bg-dark-bg flex items-center justify-center"><Zap className="animate-spin text-brand-purple" size={48} /></div>;
+  if (isLoading) return <div className="min-h-screen bg-dark-bg flex items-center justify-center"><Zap className="animate-spin text-brand-purple" size={48} /></div>;
 
   return (
     <div className="min-h-screen bg-dark-bg flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -146,3 +145,4 @@ export default function ValidateTicketPage() {
     </div>
   );
 }
+

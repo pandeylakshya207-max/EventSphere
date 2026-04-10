@@ -1,20 +1,27 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEvents } from "@/context/EventContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, Zap, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { supabase } from "../../lib/supabase";
 
 export default function Home() {
   const router = useRouter();
-  const { events, getSurpriseEvent } = useEvents();
+  const [events, setEvents] = useState<any[]>([]);
   const [search, setSearch] = useState("");
 
-  const trendingEvents = events.slice(0, 3);
-  const liveEvents = events.filter(e => e.date === new Date().toISOString().split('T')[0]);
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const { data } = await supabase.from("events").select("*").order("created_at", { ascending: false }).limit(5);
+      if (data) setEvents(data);
+    };
+    fetchEvents();
+  }, []);
 
+  const trendingEvents = events.slice(0, 3);
+  
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (search.trim()) {
@@ -23,9 +30,9 @@ export default function Home() {
   };
 
   const handleSurpriseMe = () => {
-    const event = getSurpriseEvent();
-    if (event) {
-      router.push(`/events/${event.id}`);
+    if (events.length > 0) {
+      const randomIndex = Math.floor(Math.random() * events.length);
+      router.push(`/events/${events[randomIndex].id}`);
     }
   };
 
@@ -191,3 +198,4 @@ export default function Home() {
     </main>
   );
 }
+

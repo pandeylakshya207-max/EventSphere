@@ -8,7 +8,7 @@ import {
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEvents } from "@/context/EventContext";
+import { useEvents } from "@/lib/dummyHooks";
 import { toast } from "sonner";
 
 function TicketsSkeleton() {
@@ -22,7 +22,6 @@ function TicketsSkeleton() {
 }
 
 export default function MyTicketsPage() {
-  const { data: session } = useSession();
   const { getTicketsByUserId, currentUser } = useEvents();
   const [userTickets, setUserTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,14 +29,13 @@ export default function MyTicketsPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const user = currentUser || session?.user;
-    if (user) {
-      const userId = (user as any).id || "demo_user_id";
+    if (currentUser) {
+      const userId = (currentUser as any).id;
       const tickets = getTicketsByUserId(userId);
       setUserTickets(tickets);
     }
     setLoading(false);
-  }, [session, currentUser, getTicketsByUserId]);
+  }, [currentUser, getTicketsByUserId]);
 
   const filteredTickets = userTickets.filter(ticket => {
     const matchesSearch = ticket.event?.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -178,3 +176,4 @@ export default function MyTicketsPage() {
     </div>
   );
 }
+

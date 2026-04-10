@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { useAuth } from "./auth-provider";
 import { useEffect, useState, useRef } from "react";
 import {
   Ticket,
@@ -17,12 +17,9 @@ import {
   ShieldCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEvents } from "@/context/EventContext";
 
 export function Navbar() {
-  const { data: session } = useSession();
-  const { currentUser, logout } = useEvents();
-  const user = currentUser || session?.user;
+  const { user, signOut } = useAuth();
   const isLoggedIn = !!user;
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -116,7 +113,7 @@ export function Navbar() {
                   className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 border border-white/10 hover:border-brand-purple/50 transition-all"
                 >
                   <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-brand-purple/20 flex items-center justify-center text-brand-purple-light text-sm font-bold shadow-inner">
-                    {user?.name?.[0]?.toUpperCase() ?? <User size={14} />}
+                    {user?.email?.[0]?.toUpperCase() ?? <User size={14} />}
                   </div>
                   <ChevronDown size={14} className={`text-gray-500 transition-transform duration-300 ${dropdownOpen ? "rotate-180" : ""}`} />
                 </button>
@@ -132,10 +129,10 @@ export function Navbar() {
                     >
                       {/* User Info */}
                       <div className="p-4 border-b border-white/5 mb-2 bg-white/5 rounded-t-lg">
-                        <div className="font-black text-white text-sm line-clamp-1">{user?.name}</div>
+                        <div className="font-black text-white text-sm line-clamp-1">{user?.user_metadata?.full_name || user?.email}</div>
                         <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1 mt-1">
                           <ShieldCheck size={10} className="text-brand-cyan" />
-                          {user?.role || "Explorer"}
+                          {user?.user_metadata?.role || "Explorer"}
                         </div>
                       </div>
 
@@ -162,8 +159,7 @@ export function Navbar() {
                         
                         <button
                           onClick={() => {
-                            logout();
-                            signOut({ callbackUrl: "/" });
+                            signOut();
                           }}
                           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-500/80 hover:text-red-500 hover:bg-red-500/5 transition-all group"
                         >
@@ -209,10 +205,10 @@ export function Navbar() {
               {isLoggedIn && (
                 <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10">
                    <div className="w-12 h-12 rounded-xl bg-brand-purple/20 flex items-center justify-center text-brand-purple-light text-lg font-black">
-                      {user?.name?.[0]}
+                      {user?.email?.[0]?.toUpperCase()}
                    </div>
                    <div>
-                      <div className="font-bold text-white">{user?.name}</div>
+                      <div className="font-bold text-white">{user?.user_metadata?.full_name || user?.email}</div>
                       <div className="text-xs text-gray-500">{user?.email}</div>
                    </div>
                 </div>
@@ -245,8 +241,7 @@ export function Navbar() {
                   </Link>
                   <button
                     onClick={() => {
-                      logout();
-                      signOut({ callbackUrl: "/" });
+                      signOut();
                     }}
                     className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-base font-bold text-red-500/80 hover:text-red-500 hover:bg-red-500/5 transition-all"
                   >
@@ -284,3 +279,4 @@ export function Navbar() {
     </>
   );
 }
+

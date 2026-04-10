@@ -9,13 +9,13 @@ import {
 } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { useEvents } from "@/context/EventContext";
-import { useSession } from "next-auth/react";
+import { useEvents } from "@/lib/dummyHooks";
+import { useAuth } from "@/components/auth-provider";
 
 export default function TicketPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user: supabaseUser } = useAuth();
   const { getTicketById } = useEvents();
   const [ticket, setTicket] = useState<any>(null);
   const [qrUrl, setQrUrl] = useState("");
@@ -26,12 +26,14 @@ export default function TicketPage() {
     if (data) {
       setTicket({
           ...data,
-          user: session?.user || { name: "Attendee" }
+          user: supabaseUser ? { 
+            name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split("@")[0] 
+          } : { name: "Attendee" }
       });
       generateQR(data.qrCode);
     }
     setLoading(false);
-  }, [id, getTicketById, session]);
+  }, [id, getTicketById, supabaseUser]);
 
   const generateQR = async (text: string) => {
     try {
@@ -144,3 +146,4 @@ export default function TicketPage() {
     </div>
   );
 }
+

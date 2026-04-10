@@ -1,20 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { 
   User, Mail, Shield, Save, ArrowLeft, 
   MapPin, Globe, Calendar, LogOut, CheckCircle2 
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useEvents } from "@/context/EventContext";
+import { useEvents } from "@/lib/dummyHooks";
 import { toast } from "sonner";
 
 export default function AccountPage() {
-  const { data: session } = useSession();
   const { currentUser, updateUser, logout } = useEvents();
-  const user = currentUser || session?.user;
+  const user = currentUser;
   
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -158,3 +156,4 @@ export default function AccountPage() {
     </div>
   );
 }
+

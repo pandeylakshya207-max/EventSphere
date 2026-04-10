@@ -6,22 +6,22 @@ import {
   XCircle, Filter, Search, BarChart3,
   Settings, ShieldAlert
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/components/auth-provider";
 import { useRouter } from "next/navigation";
 
 export default function AdminPanel() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const router = useRouter();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (session && (session.user as any).role !== "ADMIN" && (session.user as any).email !== "admin@eventsphere.com") {
+    if (user && user.user_metadata?.role !== "ADMIN" && user.email !== "admin@eventsphere.com") {
       // For demo, we allow admin@eventsphere.com
       // router.push("/"); 
     }
     fetchData();
-  }, [session]);
+  }, [user]);
 
   const fetchData = async () => {
     try {
@@ -128,3 +128,4 @@ export default function AdminPanel() {
     </div>
   );
 }
+
