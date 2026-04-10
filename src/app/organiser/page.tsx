@@ -115,7 +115,7 @@ export default function OrganiserDashboard() {
                           <div className="absolute inset-0 bg-dark-bg/20 z-10" />
                           <img 
                             src={event.image || "https://images.unsplash.com/photo-1514525253361-bee8718a300a?q=80&w=1000&auto=format&fit=crop"} 
-                            alt="" 
+                            alt={event.title || ""} 
                             onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1514525253361-bee8718a300a?q=80&w=1000&auto=format&fit=crop" }}
                             className="w-full h-full object-cover" 
                           />

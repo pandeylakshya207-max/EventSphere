@@ -117,11 +117,17 @@ function EventsContent() {
               <motion.div key={event.id} variants={itemVariants}>
                 <div className="bg-black/60 border border-white/10 rounded-2xl overflow-hidden">
 
-                  {/* IMAGE */}
-                  <img
-                    src={event.image || "https://images.unsplash.com/photo-1505373877841-8d25f7d46678"}
-                    className="w-full h-48 object-cover"
-                  />
+                  <div className="relative h-48 overflow-hidden bg-white/5">
+                    <img
+                      src={event.image || "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1600&auto=format&fit=crop"}
+                      onError={(e) => {
+                        e.currentTarget.src = "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1600&auto=format&fit=crop";
+                      }}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      alt={event.title}
+                      loading="lazy"
+                    />
+                  </div>
 
                   {/* CONTENT */}
                   <div className="p-4">

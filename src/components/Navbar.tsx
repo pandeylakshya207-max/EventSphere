@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "./auth-provider";
 import { useEffect, useState, useRef } from "react";
+import { usePathname } from "next/navigation";
 import {
   Ticket,
   User,
@@ -26,12 +27,21 @@ export function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const pathname = usePathname();
+  const isAuthPage = pathname === "/auth/signin" || pathname === "/auth/signup";
+
   /* ── Scroll listener ─────────────────────────────── */
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  /* ── Close menu/dropdown on route change ───────────── */
+  useEffect(() => {
+    setMobileOpen(false);
+    setDropdownOpen(false);
+  }, [pathname]);
 
   /* ── Close dropdown on click outside ──────────────── */
   useEffect(() => {
@@ -44,9 +54,16 @@ export function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  /* ── Close mobile menu on route change ───────────── */
+  /* ── Keyboard Support ─────────────────────────────── */
   useEffect(() => {
-    setMobileOpen(false);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setDropdownOpen(false);
+        setMobileOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const navLinks = [
@@ -90,7 +107,7 @@ export function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-6">
-            {navLinks.map(({ href, label, icon: Icon }) => (
+            {!isAuthPage && navLinks.map(({ href, label, icon: Icon }) => (
               <Link
                 key={label}
                 href={href}
@@ -110,7 +127,10 @@ export function Navbar() {
                 {/* User Trigger */}
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 border border-white/10 hover:border-brand-purple/50 transition-all"
+                  onKeyDown={(e) => e.key === "Enter" && setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 border border-white/10 hover:border-brand-purple/50 transition-all focus:outline-none focus:ring-2 focus:ring-brand-purple/50"
+                  aria-expanded={dropdownOpen}
+                  aria-haspopup="true"
                 >
                   <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-brand-purple/20 flex items-center justify-center text-brand-purple-light text-sm font-bold shadow-inner">
                     {user?.email?.[0]?.toUpperCase() ?? <User size={14} />}
@@ -172,12 +192,14 @@ export function Navbar() {
                 </AnimatePresence>
               </div>
             ) : (
-              <Link
-                href="/auth/signin"
-                className="px-3 py-1.5 md:px-5 md:py-2 text-sm rounded-lg bg-brand-purple text-white font-semibold transition-all hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]"
-              >
-                Sign In
-              </Link>
+              !isAuthPage && (
+                <Link
+                  href="/auth/signin"
+                  className="px-3 py-1.5 md:px-5 md:py-2 text-sm rounded-lg bg-brand-purple text-white font-semibold transition-all hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+                >
+                  Sign In
+                </Link>
+              )
             )}
 
             {/* Mobile Menu */}

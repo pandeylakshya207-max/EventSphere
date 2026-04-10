@@ -122,7 +122,7 @@ export default function Home() {
                  <div className="group glass-card overflow-hidden">
                     <div className="relative h-64 overflow-hidden bg-white/5">
                       <img 
-                        src={event.image} 
+                        src={event.image || "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1600&auto=format&fit=crop"} 
                         alt={event.title} 
                         onError={e => {
                           e.currentTarget.src = "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1600&auto=format&fit=crop";

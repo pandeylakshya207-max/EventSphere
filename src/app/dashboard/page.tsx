@@ -157,7 +157,7 @@ export default function DashboardPage() {
                       >
                          <div className="relative h-40 overflow-hidden bg-white/5 flex-shrink-0">
                             <img 
-                              src={event.image} 
+                              src={event.image || "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1600&auto=format&fit=crop"} 
                               onError={(e: any) => {
                                 e.currentTarget.src = "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1600&auto=format&fit=crop";
                               }}
