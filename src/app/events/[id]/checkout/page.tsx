@@ -119,7 +119,7 @@ function CheckoutContent() {
                 
                 <h2 className="text-4xl font-black mb-4 tracking-tight">Booking Confirmed!</h2>
                 <p className="text-gray-400 font-medium mb-10 leading-relaxed">
-                   Success! Your tickets for <span className="text-white font-bold">{event.title}</span> have been generated. You can find them in your dashboard.
+                   Success! Your tickets for <span className="text-white font-bold">{event.title}</span> have been generated. You can find them in your tickets section.
                 </p>
 
                 <div className="flex flex-col gap-4">
@@ -130,11 +130,11 @@ function CheckoutContent() {
                     View Official Ticket
                   </Link>
                   <Link 
-                    href="/dashboard"
+                    href="/tickets"
                     className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                   >
                     <TicketIcon size={18} />
-                    Go to Dashboard
+                    Go to My Tickets
                   </Link>
                 </div>
               </div>

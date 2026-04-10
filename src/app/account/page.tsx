@@ -55,9 +55,9 @@ export default function AccountPage() {
        
        <div className="max-w-4xl mx-auto px-6 pt-32 relative z-10">
           {/* Breadcrumb */}
-          <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-white mb-8 transition-colors group">
+          <Link href="/events" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-white mb-8 transition-colors group">
              <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-             Back to Console
+             Back to Experiences
           </Link>
 
           <div className="flex flex-col md:flex-row gap-12">

@@ -72,7 +72,6 @@ export function Navbar() {
       ? [
         { href: "/create-event", label: "Host Event", icon: Plus },
         { href: "/tickets", label: "My Tickets", icon: Ticket },
-        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       ]
       : []),
   ];
@@ -166,14 +165,6 @@ export function Navbar() {
                           <User size={16} className="group-hover:text-brand-purple transition-colors" />
                           View Profile
                         </Link>
-                        <Link 
-                          href="/dashboard" 
-                          onClick={() => setDropdownOpen(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-all group"
-                        >
-                          <Settings size={16} className="group-hover:text-brand-cyan transition-colors" />
-                          Organiser Hub
-                        </Link>
                         
                         <div className="h-px bg-white/5 my-2" />
                         
@@ -212,6 +203,14 @@ export function Navbar() {
           </div>
         </div>
       </nav>
+
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden" 
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
 
       {/* Mobile Drawer */}
       <AnimatePresence>

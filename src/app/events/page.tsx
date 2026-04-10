@@ -113,54 +113,53 @@ function EventsContent() {
             animate="visible"
             className="grid md:grid-cols-3 gap-6"
           >
-            {filteredEvents.map((event) => (
-              <motion.div key={event.id} variants={itemVariants}>
-                <div className="bg-black/60 border border-white/10 rounded-2xl overflow-hidden">
+             {filteredEvents.map((event) => (
+               <Link key={event.id} href={`/events/${event.id}`}>
+                 <motion.div variants={itemVariants}>
+                   <div className="group bg-black/60 border border-white/10 rounded-2xl overflow-hidden transition-all hover:border-brand-purple/50">
+                     <div className="relative w-full h-48 overflow-hidden rounded-t-xl bg-white/5">
+                       <img
+                         src={event.image || "/fallback.jpg"}
+                         alt={event.title}
+                         onError={(e) => {
+                           e.currentTarget.onerror = null;
+                           e.currentTarget.src = "/fallback.jpg";
+                         }}
+                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                         loading="lazy"
+                       />
+                     </div>
 
-                  <div className="relative w-full h-48 overflow-hidden rounded-t-xl bg-white/5">
-                    <img
-                      src={event.image || "/fallback.jpg"}
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = "/fallback.jpg";
-                      }}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      alt={event.title}
-                      loading="lazy"
-                    />
-                  </div>
+                     {/* CONTENT */}
+                     <div className="p-4">
+                       <h2 className="text-white font-bold text-lg leading-tight group-hover:text-brand-purple transition-colors">
+                         {event.title}
+                       </h2>
 
-                  {/* CONTENT */}
-                  <div className="p-4">
-                    <h2 className="text-white font-bold text-lg">
-                      {event.title}
-                    </h2>
+                       <p className="text-gray-400 text-sm mt-1 line-clamp-2">
+                         {event.description}
+                       </p>
 
-                    <p className="text-gray-400 text-sm mt-1">
-                      {event.description}
-                    </p>
+                       <div className="mt-3 space-y-1">
+                          <p className="text-gray-500 text-xs flex items-center gap-1">
+                            <MapPin size={12} className="text-brand-cyan" /> {event.location}
+                          </p>
 
-                    <p className="text-gray-500 text-xs mt-2">
-                      📍 {event.location}
-                    </p>
+                          <p className="text-gray-500 text-xs flex items-center gap-1">
+                            <Calendar size={12} className="text-brand-purple" /> {new Date(event.date).toLocaleDateString()}
+                          </p>
+                       </div>
 
-                    <p className="text-gray-500 text-xs">
-                      📅 {new Date(event.date).toLocaleDateString()}
-                    </p>
-
-                    <div className="mt-4">
-                      <Link
-                        href={`/events/${event.id}`}
-                        className="block text-center bg-brand-purple text-white py-2 rounded-lg"
-                      >
-                        Register Now
-                      </Link>
-                    </div>
-
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                       <div className="mt-4">
+                         <div className="w-full text-center bg-brand-purple text-white py-2 rounded-lg text-sm font-bold">
+                           Register Now
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 </motion.div>
+               </Link>
+             ))}
           </motion.div>
         ) : (
           <div className="text-center text-gray-400 py-20">
