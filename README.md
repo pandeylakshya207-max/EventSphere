@@ -47,11 +47,16 @@
 ## 📊 GitHub Stats
 
 <p align="left">
-  <img src="https://github-readme-streak-stats.herokuapp.com/?user=lakshyapandey&theme=default&hide_border=true" height="150"/>
-  &nbsp;
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=lakshyapandey&layout=compact&hide_border=true&langs_count=6" height="150"/>
-</p>
 
+  <!-- GitHub Streak (Dark + Modern Theme) -->
+  <img src="https://github-readme-streak-stats.herokuapp.com/?user=lakshyapandey&theme=tokyonight&hide_border=true&background=00000000" height="160"/>
+
+  &nbsp;
+
+  <!-- Top Languages (Transparent + Dark Card Style) -->
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=lakshyapandey&layout=compact&theme=tokyonight&hide_border=true&bg_color=00000000&langs_count=6" height="160"/>
+
+</p>
 ---
 
 ## 📬 Contact
