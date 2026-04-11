@@ -47,15 +47,13 @@
 ## 📊 GitHub Stats
 
 <p align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=lakshyapandey&show_icons=true&theme=tokyonight&hide_border=true" height="150" alt="GitHub Stats" />
-  
+  <img src="https://github-readme-stats.vercel.app/api?username=lakshyapandey&show_icons=true&theme=tokyonight&hide_border=true&v=1" height="150" alt="GitHub Stats" />
   &nbsp;
-
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=lakshyapandey&layout=compact&hide_border=true&langs_count=6&theme=tokyonight" height="150" alt="Top Languages" />
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=lakshyapandey&layout=compact&hide_border=true&langs_count=6&theme=tokyonight&v=1" height="150" alt="Top Languages" />
 </p>
 
 <p align="center">
-  <img src="https://streak-stats.demolab.com/?user=lakshyapandey&theme=tokyonight&hide_border=true&date_format=M%20j%5B%2C%20Y%5D" alt="GitHub Streak" />
+  <img src="https://streak-stats.demolab.com/?user=lakshyapandey&theme=tokyonight&hide_border=true&v=1" alt="GitHub Streak" />
 </p>
 
 ---
