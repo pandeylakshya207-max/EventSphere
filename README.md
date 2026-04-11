@@ -48,11 +48,11 @@
 
 <p align="center">
 
-  <!-- GitHub Streak -->
-  <img src="https://streak-stats.demolab.com?user=lakshyapandey&theme=tokyonight&hide_border=true&background=00000000" height="160"/>
+  <img src="https://streak-stats.demolab.com/?user=lakshyapandey&theme=tokyonight&hide_border=true" height="150"/>
+  
+  &nbsp;
 
-  <!-- Top Languages -->
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=lakshyapandey&layout=compact&hide_border=true&langs_count=6&theme=tokyonight&bg_color=00000000" height="160"/>
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=lakshyapandey&layout=compact&hide_border=true&langs_count=6&theme=tokyonight&cache_seconds=1800" height="150"/>
 
 </p>
 ---
