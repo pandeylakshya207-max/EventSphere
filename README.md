@@ -1,89 +1,64 @@
-# 🎟️ EventSphere
+# Lakshya Pandey · Full-Stack Engineer | Next.js · Node.js · Auth · Supabase
 
-EventSphere is a modern event organizing and ticket booking web application built with Next.js. Users can explore events, book tickets, and manage their bookings seamlessly.
-
----
-
-## 🚀 Features
-
-* 🔍 Browse and search events
-* 🎫 Book tickets with integrated payment (Razorpay)
-* 👤 User authentication (Sign Up / Sign In)
-* 🧾 My Tickets dashboard
-* 🖼️ Smart image handling with fallback support
-* ⚡ Responsive UI with smooth animations
-* 🔔 Real-time notifications
+> I build **production-ready web apps** — from real-time booking flows to secure backend systems — with clean APIs, responsive UIs, and smooth UX.  
+> Specialization: **event-tech platforms**, scalable backend services, and modern full-stack integrations.  
+> Comfortable taking a feature from wireframe to deployed application — solo or in a team.
 
 ---
 
-## 🛠️ Tech Stack
+## 🟢 Current Status
 
-* Frontend: Next.js, React, Tailwind CSS
-* Backend: Node.js (API Routes)
-* Database: (MongoDB / PostgreSQL)
-* Payments: Razorpay
-* Auth: JWT / NextAuth
+🚀 **Building [EventSphere](https://github.com/pandeylakshya207-max/EventSphere)** — a full-stack event booking platform with JWT auth, Supabase backend, and real-time features  
+📬 **Open to SWE / Full-Stack internships & new grad roles**
 
 ---
 
-## 📦 Installation
+## 🛠 Skills
 
-```bash
-git clone https://github.com/YOUR_USERNAME/eventsphere.git
-cd eventsphere
-npm install
-npm run dev
-```
-## To run the program
-
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-
-npm.cmd install
-npm.cmd run dev
+| Layer | Technologies |
+|---|---|
+| **Frontend** | Next.js · React · Tailwind CSS |
+| **Backend** | Node.js · REST APIs · Render |
+| **Database** | Supabase · PostgreSQL |
+| **Auth** | JWT · NextAuth |
+| **DevOps & Tools** | Render · Git · VS Code |
 
 ---
 
-## 🌐 Deployment
+## 🏗 Featured Project
 
-Deployed using Vercel.
+### 🎟 EventSphere — Event Booking Platform
+> Full-stack web app for browsing, booking, and managing event tickets — built with Next.js, Supabase backend, and secure authentication.
 
----
+**What it does:**
+- Browse events, book tickets, and manage bookings via user dashboard  
+- Supabase-powered backend for database and authentication handling  
+- JWT/NextAuth authentication with protected routes  
+- Real-time updates and responsive UI  
+- Clean fallback system for missing or dynamic content  
 
-## 🔑 Environment Variables
+**Stack:** Next.js · React · Tailwind CSS · Node.js · Supabase · PostgreSQL · JWT/NextAuth · Render
 
-Create a `.env.local` file and add:
-
-```
-RAZORPAY_KEY_ID=your_key
-RAZORPAY_KEY_SECRET=your_secret
-DATABASE_URL=your_db
-JWT_SECRET=your_secret
-```
-
----
-
-## 📸 Screenshots
-
-(Add screenshots of your app here)
+📂 [View Repository](https://github.com/pandeylakshya207-max/EventSphere)  
+🌐 [Live Demo](https://eventsphere-o3if.onrender.com)
 
 ---
 
-## 🎯 Future Improvements
+## 📊 GitHub Stats
 
-* QR code ticket system
-* Email notifications
-* Admin dashboard
-* AI-based event recommendations
-
----
-
-## 👨‍💻 Author
-
-* Lakshya Pandey
-* Prince Mittal
+<p align="left">
+  <img src="https://github-readme-streak-stats.herokuapp.com/?user=lakshyapandey&theme=default&hide_border=true" height="150"/>
+  &nbsp;
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=lakshyapandey&layout=compact&hide_border=true&langs_count=6" height="150"/>
+</p>
 
 ---
 
-## ⭐ If you like this project
+## 📬 Contact
 
-Give it a star on GitHub!
+- 📧 Email: **pandeylakshya207@gmail.com**
+- 🔗 LinkedIn: https://www.linkedin.com/in/lakshyapandeybn
+
+---
+
+<sub>⚡ Always building · Open to opportunities · Let's ship something great together</sub>
