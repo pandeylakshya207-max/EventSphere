@@ -88,7 +88,7 @@ Log in to your [Supabase dashboard](https://app.supabase.com), create a new proj
 npm run dev
 ```
 
-The application will be available at [http://localhost:3000](http://localhost:3000).
+
 
 ---
 
