@@ -1,0 +1,72 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["organizer", "attendee"] },
+        "wishlist": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    },
+    "Event": {
+      "title": "Event",
+      "description": "Event details",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "location": { "type": "string" },
+        "category": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "organizerId": { "type": "string" },
+        "organizerName": { "type": "string" },
+        "price": { "type": "number" },
+        "capacity": { "type": "number" },
+        "ticketsSold": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "date", "organizerId", "organizerName", "createdAt"]
+    },
+    "Registration": {
+      "title": "Registration",
+      "description": "User registration for an event",
+      "type": "object",
+      "properties": {
+        "eventId": { "type": "string" },
+        "eventTitle": { "type": "string" },
+        "eventDate": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "ticketCount": { "type": "number" },
+        "totalPrice": { "type": "number" },
+        "checkedIn": { "type": "boolean" },
+        "checkInTime": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["eventId", "userId", "ticketCount", "totalPrice", "checkedIn", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/events/{eventId}": {
+      "schema": "Event",
+      "description": "Event listings"
+    },
+    "/events/{eventId}/registrations/{registrationId}": {
+      "schema": "Registration",
+      "description": "Event registrations"
+    }
+  }
+}
