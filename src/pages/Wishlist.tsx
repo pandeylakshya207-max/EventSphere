@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { db, collection, query, where, getDocs, doc, getDoc } from '../lib/firebase';
+import { useState, useEffect } from 'react';
+import * as api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { Event } from '../types';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -10,36 +10,22 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 
 export default function Wishlist() {
-  const { profile, user } = useAuth();
+  const { profile } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchWishlist = async () => {
-      if (!profile?.wishlist || profile.wishlist.length === 0) {
-        setEvents([]);
-        setLoading(false);
-        return;
-      }
+    if (!profile) {
+      setLoading(false);
+      return;
+    }
+    api.getWishlist()
+      .then(setEvents)
+      .catch(err => console.error("Error fetching wishlist events:", err))
+      .finally(() => setLoading(false));
+  }, [profile]);
 
-      try {
-        const eventPromises = profile.wishlist.map(id => getDoc(doc(db, 'events', id)));
-        const eventDocs = await Promise.all(eventPromises);
-        const wishlistEvents = eventDocs
-          .filter(d => d.exists())
-          .map(d => ({ id: d.id, ...d.data() } as Event));
-        setEvents(wishlistEvents);
-      } catch (error) {
-        console.error("Error fetching wishlist events:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWishlist();
-  }, [profile?.wishlist]);
-
-  if (!user) {
+  if (!profile) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <h1 className="text-2xl font-display mb-4">Please Sign In</h1>
@@ -78,8 +64,8 @@ export default function Wishlist() {
               <Link to={`/event/${event.id}`}>
                 <Card className="glass-card h-full flex flex-col group hover:border-white/30 transition-all border-white/10 overflow-hidden">
                   <div className="relative h-48 overflow-hidden">
-                    <img 
-                      src={event.imageUrl || `https://picsum.photos/seed/${event.id}/800/600`} 
+                    <img
+                      src={event.image_url || `https://picsum.photos/seed/${event.id}/800/600`}
                       alt={event.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       referrerPolicy="no-referrer"
@@ -94,7 +80,7 @@ export default function Wishlist() {
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-2 text-white/40 text-xs uppercase tracking-widest">
                         <Calendar className="w-3 h-3" />
-                        {event.date.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        {new Date(event.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </div>
                       <div className="text-white font-medium">
                         {event.price === 0 ? 'Free' : `$${event.price}`}

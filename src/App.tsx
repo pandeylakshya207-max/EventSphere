@@ -7,6 +7,7 @@ import { CreateEvent } from './pages/CreateEvent';
 import { Dashboard } from './pages/Dashboard';
 import CheckIn from './pages/CheckIn';
 import Wishlist from './pages/Wishlist';
+import { Login } from './pages/Login';
 import { AuthProvider } from './context/AuthContext';
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
           <main className="container mx-auto px-4 py-8">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
               <Route path="/event/:id" element={<EventDetails />} />
               <Route path="/create" element={<CreateEvent />} />
               <Route path="/dashboard" element={<Dashboard />} />

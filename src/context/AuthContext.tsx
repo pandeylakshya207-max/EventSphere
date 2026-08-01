@@ -1,100 +1,88 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth, db, doc, getDoc, setDoc, Timestamp, onAuthStateChanged, User } from '../lib/firebase';
-import { UserProfile } from '../types';
+import * as api from '../lib/api';
+import { UserProfile, Event } from '../types';
 
 interface AuthContextType {
-  user: User | null;
   profile: UserProfile | null;
   loading: boolean;
   isOrganizer: boolean;
+  wishlist: Event[];
+  refreshWishlist: () => Promise<void>;
   toggleWishlist: (eventId: string) => Promise<void>;
-  mockLogin: (role: 'organizer' | 'attendee') => void;
+  signup: (email: string, password: string, displayName: string, role: 'organizer' | 'attendee') => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
   profile: null,
   loading: true,
   isOrganizer: false,
+  wishlist: [],
+  refreshWishlist: async () => {},
   toggleWishlist: async () => {},
-  mockLogin: () => {},
+  signup: async () => {},
+  login: async () => {},
+  logout: () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [wishlist, setWishlist] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const toggleWishlist = async (eventId: string) => {
-    if (!user || !profile) return;
-    const newWishlist = profile.wishlist?.includes(eventId)
-      ? profile.wishlist.filter(id => id !== eventId)
-      : [...(profile.wishlist || []), eventId];
-    
-    await setDoc(doc(db, 'users', user.uid), { wishlist: newWishlist }, { merge: true });
-    setProfile({ ...profile, wishlist: newWishlist });
+  const refreshWishlist = async () => {
+    if (!profile) {
+      setWishlist([]);
+      return;
+    }
+    try {
+      setWishlist(await api.getWishlist());
+    } catch {
+      setWishlist([]);
+    }
   };
 
-  const mockLogin = (role: 'organizer' | 'attendee') => {
-    const mockUser = {
-      uid: `mock-${role}`,
-      displayName: `Demo ${role.charAt(0).toUpperCase() + role.slice(1)}`,
-      email: `${role}@demo.local`,
-      photoURL: `https://api.dicebear.com/7.x/avataaars/svg?seed=${role}`,
-    } as User;
+  const toggleWishlist = async (eventId: string) => {
+    if (!profile) return;
+    await api.toggleWishlist(eventId);
+    await refreshWishlist();
+  };
 
-    const mockProfile: UserProfile = {
-      uid: mockUser.uid,
-      displayName: mockUser.displayName!,
-      email: mockUser.email!,
-      photoURL: mockUser.photoURL,
-      role: role,
-      wishlist: [],
-      createdAt: Timestamp.now(),
-    };
+  const signup = async (email: string, password: string, displayName: string, role: 'organizer' | 'attendee') => {
+    const user = await api.signup(email, password, displayName, role);
+    setProfile(user);
+  };
 
-    setUser(mockUser);
-    setProfile(mockProfile);
-    setLoading(false);
-    localStorage.setItem('mock_user_role', role);
+  const login = async (email: string, password: string) => {
+    const user = await api.login(email, password);
+    setProfile(user);
+  };
+
+  const logout = () => {
+    api.logout();
+    setProfile(null);
+    setWishlist([]);
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUser(user);
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          setProfile(userDoc.data() as UserProfile);
-        } else {
-          // Determine role for demo users or default to attendee
-          let role: 'organizer' | 'attendee' = 'attendee';
-          if (user.email === 'organizer@demo.com' || user.uid.includes('organizer')) role = 'organizer';
-          
-          const newProfile: UserProfile = {
-            uid: user.uid,
-            displayName: user.displayName || (role === 'organizer' ? 'Demo Organizer' : 'Demo Attendee'),
-            email: user.email,
-            photoURL: user.photoURL,
-            role: role,
-            wishlist: [],
-            createdAt: Timestamp.now(),
-          };
-          await setDoc(doc(db, 'users', user.uid), newProfile);
-          setProfile(newProfile);
-        }
-      } else {
-        setUser(null);
-        setProfile(null);
-      }
+    (async () => {
+      const user = await api.getCurrentUser();
+      setProfile(user);
       setLoading(false);
-    });
-
-    return () => unsubscribe();
+    })();
   }, []);
 
+  useEffect(() => {
+    refreshWishlist();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id]);
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, isOrganizer: profile?.role === 'organizer', toggleWishlist, mockLogin }}>
+    <AuthContext.Provider value={{
+      profile, loading, isOrganizer: profile?.role === 'organizer',
+      wishlist, refreshWishlist, toggleWishlist, signup, login, logout,
+    }}>
       {children}
     </AuthContext.Provider>
   );

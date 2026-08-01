@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { db, doc, onSnapshot, updateDoc, increment, collection, addDoc, Timestamp, query, where, getDocs } from '../lib/firebase';
+import * as api from '../lib/api';
 import { Event } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -13,88 +13,65 @@ import { motion } from 'motion/react';
 export const EventDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, profile, toggleWishlist } = useAuth();
+  const { profile, toggleWishlist, wishlist } = useAuth();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
 
+  const wishlisted = wishlist.some(e => e.id === id);
+
   useEffect(() => {
     if (!id) return;
-    const unsubscribe = onSnapshot(doc(db, 'events', id), (doc) => {
-      if (doc.exists()) {
-        setEvent({ id: doc.id, ...doc.data() } as Event);
-      } else {
+    setLoading(true);
+    api.getEvent(id)
+      .then(setEvent)
+      .catch(() => {
         toast.error("Event not found");
         navigate('/');
-      }
-      setLoading(false);
-    });
+      })
+      .finally(() => setLoading(false));
 
-    if (user && id) {
-      const checkRegistration = async () => {
-        const q = query(
-          collection(db, 'registrations'),
-          where('userId', '==', user.uid),
-          where('eventId', '==', id)
-        );
-        const snapshot = await getDocs(q);
-        setIsRegistered(!snapshot.empty);
-      };
-      checkRegistration();
+    if (profile) {
+      api.myRegistrations()
+        .then(regs => setIsRegistered(regs.some(r => r.event_id === id)))
+        .catch(() => {});
     }
-
-    return () => unsubscribe();
-  }, [id, user, navigate]);
+  }, [id, profile, navigate]);
 
   const handleRegister = async () => {
-    if (!user) {
+    if (!profile) {
       toast.error("Please sign in to register");
       return;
     }
     if (!event || !id) return;
-    if (event.ticketsSold >= event.capacity) {
-      toast.error("Event is sold out");
-      return;
-    }
 
     setRegistering(true);
     try {
-      await addDoc(collection(db, 'registrations'), {
-        eventId: id,
-        eventTitle: event.title,
-        eventDate: event.date,
-        userId: user.uid,
-        userName: user.displayName || 'Anonymous',
-        userEmail: user.email || '',
-        ticketCount: 1,
-        totalPrice: event.price,
-        checkedIn: false,
-        createdAt: Timestamp.now()
-      });
-      await updateDoc(doc(db, 'events', id), {
-        ticketsSold: increment(1)
-      });
+      await api.registerForEvent(id, 1);
       setIsRegistered(true);
+      // Refresh event to get the real updated tickets_sold from the server
+      // (the backend, not this client, is the source of truth for capacity)
+      const updated = await api.getEvent(id);
+      setEvent(updated);
       toast.success("Successfully registered for the event!");
     } catch (error) {
-      console.error(error);
-      toast.error("Registration failed");
+      toast.error(error instanceof Error ? error.message : "Registration failed");
     } finally {
       setRegistering(false);
     }
   };
 
   const handleWishlist = async () => {
-    if (!user || !id) {
+    if (!profile || !id) {
       toast.error("Please sign in to wishlist events");
       return;
     }
     try {
+      const wasWishlisted = wishlisted;
       await toggleWishlist(id);
-      const isWishlisted = profile?.wishlist?.includes(id);
-      toast.success(isWishlisted ? "Removed from wishlist" : "Added to wishlist");
-    } catch (error) {
+      toast.success(wasWishlisted ? "Removed from wishlist" : "Added to wishlist");
+    } catch {
       toast.error("Failed to update wishlist");
     }
   };
@@ -116,35 +93,35 @@ export const EventDetails = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-6">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="aspect-video rounded-3xl overflow-hidden border border-white/10"
           >
-            <img 
-              src={event.imageUrl || `https://picsum.photos/seed/${event.id}/1200/800`} 
+            <img
+              src={event.image_url || `https://picsum.photos/seed/${event.id}/1200/800`}
               alt={event.title}
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"
             />
           </motion.div>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <Badge className="bg-white text-black hover:bg-white">{event.category}</Badge>
-                  <span className="text-white/40 text-sm">Organized by {event.organizerName}</span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleWishlist}
-                  className="bg-white/5 border border-white/10 hover:bg-white hover:text-black rounded-full transition-all"
-                >
-                  <Heart className={`w-5 h-5 ${profile?.wishlist?.includes(id!) ? 'fill-pink-500 text-pink-500' : ''}`} />
-                </Button>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <Badge className="bg-white text-black hover:bg-white">{event.category}</Badge>
+                <span className="text-white/40 text-sm">Organized by {event.organizer_name}</span>
               </div>
-              <h1 className="text-5xl md:text-6xl font-display">{event.title}</h1>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleWishlist}
+                className="bg-white/5 border border-white/10 hover:bg-white hover:text-black rounded-full transition-all"
+              >
+                <Heart className={`w-5 h-5 ${wishlisted ? 'fill-pink-500 text-pink-500' : ''}`} />
+              </Button>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-display">{event.title}</h1>
             <p className="text-white/70 text-lg leading-relaxed whitespace-pre-wrap">
               {event.description}
             </p>
@@ -160,10 +137,10 @@ export const EventDetails = () => {
                   <div>
                     <p className="font-medium">Date & Time</p>
                     <p className="text-white/50 text-sm">
-                      {event.date.toDate().toLocaleDateString('en-US', { 
-                        weekday: 'long', 
-                        month: 'long', 
-                        day: 'numeric', 
+                      {new Date(event.event_date).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        month: 'long',
+                        day: 'numeric',
                         year: 'numeric',
                         hour: 'numeric',
                         minute: '2-digit'
@@ -185,7 +162,7 @@ export const EventDetails = () => {
                   <div>
                     <p className="font-medium">Availability</p>
                     <p className="text-white/50 text-sm">
-                      {event.capacity - event.ticketsSold} spots remaining
+                      {event.capacity - event.tickets_sold} spots remaining
                     </p>
                   </div>
                 </div>
@@ -203,13 +180,13 @@ export const EventDetails = () => {
                     Registered
                   </Button>
                 ) : (
-                  <Button 
-                    onClick={handleRegister} 
-                    disabled={registering || event.ticketsSold >= event.capacity}
+                  <Button
+                    onClick={handleRegister}
+                    disabled={registering || event.tickets_sold >= event.capacity}
                     className="w-full premium-button h-12 text-lg"
                   >
-                    {registering ? <Loader2 className="w-5 h-5 animate-spin" /> : 
-                     event.ticketsSold >= event.capacity ? "Sold Out" : "Get Tickets"}
+                    {registering ? <Loader2 className="w-5 h-5 animate-spin" /> :
+                     event.tickets_sold >= event.capacity ? "Sold Out" : "Get Tickets"}
                   </Button>
                 )}
               </div>

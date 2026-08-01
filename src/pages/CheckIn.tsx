@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { db, doc, getDoc, updateDoc, Timestamp } from '../lib/firebase';
+import * as api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { Registration } from '../types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, XCircle, Loader2, ScanLine } from 'lucide-react';
+import { CheckCircle2, Loader2, ScanLine } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function CheckIn() {
@@ -24,50 +24,34 @@ export default function CheckIn() {
       /* verbose= */ false
     );
 
-    scanner.render(onScanSuccess, onScanFailure);
+    scanner.render(onScanSuccess, () => {});
 
     function onScanSuccess(decodedText: string) {
-      // decodedText should be the registration ID
+      // decodedText is the registration ID encoded in the QR code
       handleCheckIn(decodedText);
       scanner.clear();
       setScanning(false);
     }
 
-    function onScanFailure(error: any) {
-      // console.warn(`Code scan error = ${error}`);
-    }
-
     return () => {
       scanner.clear().catch(error => console.error("Failed to clear scanner", error));
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOrganizer]);
 
   const handleCheckIn = async (registrationId: string) => {
     setLoading(true);
     try {
-      const regDoc = await getDoc(doc(db, 'registrations', registrationId));
-      if (!regDoc.exists()) {
-        toast.error("Invalid ticket");
-        setScanning(true);
-        return;
-      }
-
-      const data = regDoc.data() as Registration;
-      setResult(data);
-
-      if (data.checkedIn) {
-        toast.warning("Already checked in");
-      } else {
-        await updateDoc(doc(db, 'registrations', registrationId), {
-          checkedIn: true,
-          checkInTime: Timestamp.now()
-        });
-        toast.success("Checked in successfully!");
-        setResult({ ...data, checkedIn: true });
-      }
+      // The backend enforces that the organizer actually owns the event
+      // this registration belongs to -- a malicious or mistaken scan of
+      // someone else's ticket is rejected server-side with a 403, not just
+      // hidden by the UI.
+      const updated = await api.checkInRegistration(registrationId);
+      setResult(updated);
+      toast.success("Checked in successfully!");
     } catch (error) {
-      console.error("Check-in error:", error);
-      toast.error("Failed to check in");
+      toast.error(error instanceof Error ? error.message : "Failed to check in");
+      setScanning(true);
     } finally {
       setLoading(false);
     }
@@ -108,7 +92,7 @@ export default function CheckIn() {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span>Ticket Details</span>
-                    {result.checkedIn ? (
+                    {!!result.checked_in ? (
                       <Badge className="bg-green-500/20 text-green-400 border-green-500/30 gap-1">
                         <CheckCircle2 className="w-3 h-3" /> Checked In
                       </Badge>
@@ -123,26 +107,26 @@ export default function CheckIn() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-xs text-white/40 uppercase tracking-wider">Attendee</p>
-                      <p className="font-medium">{result.userName}</p>
+                      <p className="font-medium">{result.user_name}</p>
                     </div>
                     <div>
                       <p className="text-xs text-white/40 uppercase tracking-wider">Event</p>
-                      <p className="font-medium">{result.eventTitle}</p>
+                      <p className="font-medium">{result.event_title}</p>
                     </div>
                     <div>
                       <p className="text-xs text-white/40 uppercase tracking-wider">Tickets</p>
-                      <p className="font-medium">{result.ticketCount}</p>
+                      <p className="font-medium">{result.ticket_count}</p>
                     </div>
                     <div>
                       <p className="text-xs text-white/40 uppercase tracking-wider">Email</p>
-                      <p className="font-medium text-sm truncate">{result.userEmail}</p>
+                      <p className="font-medium text-sm truncate">{result.user_email}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             )}
 
-            <Button 
+            <Button
               onClick={() => {
                 setResult(null);
                 setScanning(true);

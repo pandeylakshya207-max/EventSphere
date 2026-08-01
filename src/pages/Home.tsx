@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { db, collection, query, orderBy, onSnapshot, limit } from '../lib/firebase';
+import * as api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { Event } from '../types';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,50 +11,43 @@ import { motion } from 'motion/react';
 import { toast } from 'sonner';
 
 export const Home = () => {
-  const { profile, toggleWishlist, user, mockLogin } = useAuth();
+  const { profile, toggleWishlist, wishlist, isOrganizer } = useAuth();
+  const navigate = useNavigate();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Only query/fetch events if the user is authenticated
-    if (!user) {
+    if (!profile) {
       setLoading(false);
       return;
     }
+    setLoading(true);
+    api.listEvents(10)
+      .then(setEvents)
+      .catch((err) => console.error('Error loading events:', err))
+      .finally(() => setLoading(false));
+  }, [profile]);
 
-    const q = query(collection(db, 'events'), orderBy('date', 'asc'), limit(10));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const eventList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
-      setEvents(eventList);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error loading events:", error);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, [user]);
+  const wishlistIds = new Set(wishlist.map(e => e.id));
 
   const handleWishlist = async (e: React.MouseEvent, eventId: string) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!user) {
+    if (!profile) {
       toast.error("Please sign in to wishlist events");
       return;
     }
     try {
+      const wasWishlisted = wishlistIds.has(eventId);
       await toggleWishlist(eventId);
-      const isWishlisted = profile?.wishlist?.includes(eventId);
-      toast.success(isWishlisted ? "Removed from wishlist" : "Added to wishlist");
-    } catch (error) {
+      toast.success(wasWishlisted ? "Removed from wishlist" : "Added to wishlist");
+    } catch {
       toast.error("Failed to update wishlist");
     }
   };
 
-  const isAttendee = profile?.role === 'attendee';
-  const isOrganizer = profile?.role === 'organizer';
-
-  // 1. Guest/Not Logged In view: High fidelity landing page explaining EventSphere with an eye-catching CTA
-  if (!user) {
+  // 1. Guest/Not Logged In view
+  if (!profile) {
     return (
       <div className="space-y-16 pb-12">
         <section className="text-center space-y-8 py-16 max-w-4xl mx-auto flex flex-col items-center">
@@ -67,7 +60,7 @@ export const Home = () => {
             DISCOVER THE EXTRAORDINARY
           </motion.div>
 
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -75,15 +68,15 @@ export const Home = () => {
           >
             Your Private Gateway to <span className="italic text-white/50 block md:inline">Unforgettable</span> Moments
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="text-white/60 text-lg md:text-xl max-w-2xl mx-auto font-sans leading-relaxed"
           >
-            Browse curated local events, claim exclusive gold-tier tickets, and manage effortless check-ins in one unified space. 
-            <span className="block mt-2 text-white/40">Securely sign in as an attendee today to explore the calendar.</span>
+            Browse curated local events, claim exclusive gold-tier tickets, and manage effortless check-ins in one unified space.
+            <span className="block mt-2 text-white/40">Sign in or create an account to explore the calendar.</span>
           </motion.p>
 
           <motion.div
@@ -94,19 +87,15 @@ export const Home = () => {
           >
             <Button
               size="lg"
-              onClick={() => {
-                mockLogin('attendee');
-                toast.success("Welcome! Logged in securely as a Demo Attendee.");
-              }}
+              onClick={() => navigate('/login')}
               className="bg-white hover:bg-white/90 text-black font-medium text-lg px-8 py-6 rounded-full inline-flex items-center gap-2 shadow-2xl hover:scale-105 active:scale-95 transition-all"
             >
-              Sign In as Attendee to Browse Events
+              Sign In to Browse Events
               <ArrowRight className="w-5 h-5" />
             </Button>
           </motion.div>
         </section>
 
-        {/* Feature Highlights Grid */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto px-4 pt-4">
           <div className="glass-card p-8 rounded-2xl border border-white/5 space-y-4 hover:border-white/10 transition-colors">
             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
@@ -142,16 +131,16 @@ export const Home = () => {
     );
   }
 
-  // 2. Organizer logged in view: Welcome guide directing them to create or manage
+  // 2. Organizer view
   if (isOrganizer) {
     return (
       <div className="max-w-4xl mx-auto py-16 space-y-8 text-center flex flex-col items-center">
         <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-2">
           <Calendar className="w-8 h-8 text-white" />
         </div>
-        <h1 className="text-4xl md:text-5xl font-display">Hello, Demo Organizer!</h1>
+        <h1 className="text-4xl md:text-5xl font-display">Hello, {profile.displayName}!</h1>
         <p className="text-white/60 text-lg max-w-xl">
-          You are currently signed in with management credentials. To browse the live events feed and practice booking tickets, please switch to an attendee account, or access your creator console below.
+          You're signed in as an organizer. Create a new event or manage your existing ones from your console below.
         </p>
         <div className="flex flex-wrap gap-4 justify-center pt-4">
           <Link to="/create">
@@ -165,27 +154,17 @@ export const Home = () => {
               Go to Creator Console
             </Button>
           </Link>
-          <Button 
-            variant="ghost" 
-            onClick={() => {
-              mockLogin('attendee');
-              toast.success("Switched to Demo Attendee profile");
-            }} 
-            className="text-white/60 hover:text-white"
-          >
-            Switch to Attendee Mode
-          </Button>
         </div>
       </div>
     );
   }
 
-  // 3. Attendee logged in view: Elegant dynamic events feed
+  // 3. Attendee view
   return (
     <div className="space-y-12">
       <section className="space-y-4 max-w-4xl">
         <h1 className="text-4xl md:text-6xl font-display">
-          Welcome back, <span className="text-white/60 italic">{profile?.displayName || 'Attendee'}</span>
+          Welcome back, <span className="text-white/60 italic">{profile.displayName}</span>
         </h1>
         <p className="text-white/50 text-lg max-w-xl">
           Discover handpicked local experiences and secure your reservations. Use your dashboard to view booked tickets.
@@ -208,8 +187,8 @@ export const Home = () => {
               <Link to={`/event/${event.id}`}>
                 <Card className="glass-card overflow-hidden group hover:border-white/30 transition-all duration-500">
                   <div className="aspect-video relative overflow-hidden">
-                    <img 
-                      src={event.imageUrl || `https://picsum.photos/seed/${event.id}/800/450`} 
+                    <img
+                      src={event.image_url || `https://picsum.photos/seed/${event.id}/800/450`}
                       alt={event.title}
                       className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700"
                       referrerPolicy="no-referrer"
@@ -223,8 +202,8 @@ export const Home = () => {
                       className="absolute top-4 right-4 bg-black/50 backdrop-blur-md border border-white/10 hover:bg-white hover:text-black rounded-full transition-all"
                       onClick={(e) => handleWishlist(e, event.id)}
                     >
-                      <Heart 
-                        className={`w-4 h-4 ${profile?.wishlist?.includes(event.id) ? 'fill-pink-500 text-pink-500' : ''}`} 
+                      <Heart
+                        className={`w-4 h-4 ${wishlistIds.has(event.id) ? 'fill-pink-500 text-pink-500' : ''}`}
                       />
                     </Button>
                   </div>
@@ -232,7 +211,7 @@ export const Home = () => {
                     <h3 className="text-2xl font-display line-clamp-1">{event.title}</h3>
                     <div className="flex items-center gap-2 text-white/50 text-sm">
                       <Calendar className="w-4 h-4" />
-                      {event.date.toDate().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      {new Date(event.event_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -244,7 +223,7 @@ export const Home = () => {
                   <CardFooter className="flex justify-between items-center border-t border-white/5 pt-4">
                     <div className="flex items-center gap-2 text-white/50 text-sm">
                       <Users className="w-4 h-4" />
-                      {event.ticketsSold} / {event.capacity}
+                      {event.tickets_sold} / {event.capacity}
                     </div>
                     <span className="text-xl font-display">${event.price}</span>
                   </CardFooter>
@@ -261,4 +240,3 @@ export const Home = () => {
     </div>
   );
 };
-

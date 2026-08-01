@@ -1,31 +1,16 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { logout, loginDemoUser } from '../lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, Plus, LogOut, LayoutDashboard, Heart, ScanLine, UserCircle } from 'lucide-react';
-import { toast } from 'sonner';
-import { useState } from 'react';
 
 export const Navbar = () => {
-  const { user, profile, isOrganizer } = useAuth();
-  const [showDemo, setShowDemo] = useState(false);
+  const { profile, isOrganizer, logout } = useAuth();
+  const navigate = useNavigate();
 
-  const handleDemoSignIn = async (role: 'organizer' | 'attendee') => {
-    try {
-      const user = await loginDemoUser(role);
-      if (user) {
-        toast.success(`Logged in as Demo ${role.charAt(0).toUpperCase() + role.slice(1)}`);
-        setShowDemo(false);
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Login failed");
-    }
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    window.location.reload(); // Force reload to clear all states
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   return (
@@ -39,7 +24,7 @@ export const Navbar = () => {
         </Link>
 
         <div className="flex items-center gap-4">
-          {user ? (
+          {profile ? (
             <>
               {isOrganizer && (
                 <>
@@ -73,49 +58,25 @@ export const Navbar = () => {
               </Link>
               <div className="flex items-center gap-3 pl-4 border-l border-white/10">
                 <Avatar className="w-8 h-8 border border-white/20">
-                  <AvatarImage src={user.photoURL || ''} />
-                  <AvatarFallback>{user.displayName?.[0] || 'U'}</AvatarFallback>
+                  <AvatarImage src={profile.photoUrl || ''} />
+                  <AvatarFallback>{profile.displayName?.[0] || 'U'}</AvatarFallback>
                 </Avatar>
-                <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white/50 hover:text-white animate-fade-in">
+                <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white/50 hover:text-white">
                   <LogOut className="w-4 h-4" />
                 </Button>
               </div>
             </>
           ) : (
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setShowDemo(!showDemo)}
-                  className="border-white/10 text-white hover:text-black hover:bg-white gap-2 transition-all"
-                >
-                  <UserCircle className="w-4 h-4" />
-                  Sign In
-                </Button>
-                
-                {showDemo && (
-                  <div className="absolute top-full right-0 mt-2 w-48 glass-card p-2 space-y-1 z-50">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="w-full justify-start hover:bg-white/10 gap-2 text-xs"
-                      onClick={() => handleDemoSignIn('organizer')}
-                    >
-                      Demo Organizer
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="w-full justify-start hover:bg-white/10 gap-2 text-xs"
-                      onClick={() => handleDemoSignIn('attendee')}
-                    >
-                      Demo Attendee
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
+            <Link to="/login">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-white/10 text-white hover:text-black hover:bg-white gap-2 transition-all"
+              >
+                <UserCircle className="w-4 h-4" />
+                Sign In
+              </Button>
+            </Link>
           )}
         </div>
       </div>

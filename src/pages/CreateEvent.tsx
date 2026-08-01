@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db, collection, addDoc, Timestamp } from '../lib/firebase';
+import * as api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { generateEventDescription } from '../lib/gemini';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Sparkles, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const CreateEvent = () => {
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -40,25 +40,25 @@ export const CreateEvent = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
-    
+    if (!profile) return;
+
     setLoading(true);
     try {
-      await addDoc(collection(db, 'events'), {
-        ...formData,
+      await api.createEvent({
+        title: formData.title,
+        description: formData.description,
+        eventDate: new Date(formData.date).toISOString(),
+        location: formData.location,
+        category: formData.category,
+        imageUrl: formData.imageUrl || undefined,
         price: Number(formData.price),
         capacity: Number(formData.capacity),
-        ticketsSold: 0,
-        organizerId: user.uid,
-        organizerName: user.displayName || 'Anonymous',
-        date: Timestamp.fromDate(new Date(formData.date)),
-        createdAt: Timestamp.now(),
       });
       toast.success("Event created successfully!");
       navigate('/');
     } catch (error) {
       console.error(error);
-      toast.error("Failed to create event");
+      toast.error(error instanceof Error ? error.message : "Failed to create event");
     } finally {
       setLoading(false);
     }

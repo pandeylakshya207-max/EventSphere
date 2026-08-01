@@ -1,42 +1,45 @@
-import { Timestamp } from '../lib/firebase';
+// Real data types matching the backend's actual response shapes.
+// Dates are ISO 8601 strings (as returned by SQLite's datetime('now') and
+// the events.event_date column) -- no more fake Firestore Timestamp class.
 
 export interface UserProfile {
-  uid: string;
-  displayName: string | null;
-  email: string | null;
-  photoURL: string | null;
+  id: string;
+  email: string;
+  displayName: string;
+  photoUrl: string | null;
   role: 'organizer' | 'attendee';
-  wishlist?: string[];
-  createdAt: Timestamp;
 }
 
 export interface Event {
   id: string;
   title: string;
   description: string;
-  date: Timestamp;
+  event_date: string; // ISO string
   location: string;
   category: string;
-  imageUrl?: string;
-  organizerId: string;
-  organizerName: string;
+  image_url?: string | null;
+  organizer_id: string;
+  organizer_name: string;
   price: number;
   capacity: number;
-  ticketsSold: number;
-  createdAt: Timestamp;
+  tickets_sold: number;
+  created_at: string;
 }
 
 export interface Registration {
   id: string;
-  eventId: string;
-  eventTitle: string;
-  eventDate: Timestamp;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  ticketCount: number;
-  totalPrice: number;
-  checkedIn: boolean;
-  checkInTime?: Timestamp;
-  createdAt: Timestamp;
+  event_id: string;
+  user_id: string;
+  ticket_count: number;
+  total_price: number;
+  checked_in: number; // SQLite stores booleans as 0/1
+  check_in_time: string | null;
+  created_at: string;
+  // Present on GET /registrations/mine (joined with event data):
+  event_title?: string;
+  event_date?: string;
+  location?: string;
+  // Present on GET /registrations/event/:id (joined with user data):
+  user_name?: string;
+  user_email?: string;
 }
