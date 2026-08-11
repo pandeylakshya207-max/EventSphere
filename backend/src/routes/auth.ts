@@ -4,6 +4,7 @@ import { z } from "zod";
 import { db } from "../db.js";
 import { hashPassword, verifyPassword, signToken } from "../auth.js";
 import { requireAuth } from "../middleware.js";
+import { loginLimiter, signupLimiter } from "../rateLimit.js";
 
 const router = Router();
 
@@ -14,7 +15,7 @@ const signupSchema = z.object({
   role: z.enum(["organizer", "attendee"]),
 });
 
-router.post("/signup", async (req, res) => {
+router.post("/signup", signupLimiter, async (req, res) => {
   const parsed = signupSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
@@ -45,7 +46,7 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });

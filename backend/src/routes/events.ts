@@ -3,14 +3,29 @@ import { randomUUID } from "crypto";
 import { z } from "zod";
 import { db, runInTransaction } from "../db.js";
 import { requireAuth, requireRole } from "../middleware.js";
+import { cache } from "../cache.js";
+
+const EVENTS_LIST_CACHE_PREFIX = "events:list:";
+const EVENTS_LIST_TTL_MS = 30 * 1000; // 30s: short enough that stale capacity numbers aren't visible for long
 
 const router = Router();
 
 router.get("/", (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 50, 100);
+  const cacheKey = `${EVENTS_LIST_CACHE_PREFIX}${limit}`;
+
+  const cached = cache.get(cacheKey);
+  if (cached) {
+    res.set("X-Cache", "HIT");
+    return res.json(cached);
+  }
+
   const events = db
     .prepare("SELECT * FROM events ORDER BY event_date ASC LIMIT ?")
     .all(limit);
+
+  cache.set(cacheKey, events, EVENTS_LIST_TTL_MS);
+  res.set("X-Cache", "MISS");
   res.json(events);
 });
 
@@ -55,6 +70,7 @@ router.post("/", requireAuth, requireRole("organizer"), (req, res) => {
         req.user!.userId, organizer.display_name, d.price, d.capacity);
 
   const event = db.prepare("SELECT * FROM events WHERE id = ?").get(id);
+  cache.invalidatePrefix(EVENTS_LIST_CACHE_PREFIX);
   res.status(201).json(event);
 });
 
@@ -115,6 +131,12 @@ router.post("/:id/register", requireAuth, (req, res) => {
     });
 
     const registration = db.prepare("SELECT * FROM registrations WHERE id = ?").get(registrationId);
+    // The events list cache includes tickets_sold, which just changed --
+    // invalidate rather than let stale capacity numbers linger for up to
+    // EVENTS_LIST_TTL_MS. A short TTL alone would eventually self-correct,
+    // but explicit invalidation on write means users never see a stale
+    // "3 spots left" right after a purchase that filled the event.
+    cache.invalidatePrefix(EVENTS_LIST_CACHE_PREFIX);
     res.status(201).json(registration);
   } catch (err: any) {
     if (err.status) {

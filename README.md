@@ -103,14 +103,54 @@ cd backend
 npm test
 ```
 
+## System-design-at-scale additions
+
+Three things were added specifically to move this from "correct CRUD app"
+toward patterns that matter once traffic grows:
+
+**Rate limiting** (`backend/src/rateLimit.ts`) — auth endpoints are
+protected against brute-force/credential-stuffing (10 login attempts /
+15 min) and signup abuse (50 signups / hour per IP). Explicitly documented
+limitation: this uses `express-rate-limit`'s in-memory store, which is
+per-process — it does NOT share state across multiple server instances.
+Scaling this app horizontally behind a load balancer would need a shared
+store (e.g. Redis via `rate-limit-redis`) so all instances agree on one
+attacker's request count.
+
+**Caching layer** (`backend/src/cache.ts`) — `GET /api/events` (the
+most-read endpoint) is cached for 30s with explicit invalidation on
+writes (new event created, new registration), so users never see stale
+ticket counts right after a purchase. Deliberately built behind a small
+`Cache` interface rather than raw `Map` calls in route handlers — swapping
+to a real Redis-backed implementation for multi-instance deployments is a
+one-file change, not a rewrite of every route that reads from cache.
+Also explicitly NOT a substitute for Redis in a horizontally-scaled
+deployment: this in-memory cache is only correct for a single process —
+each server instance would maintain its own independent cache.
+
+**A real concurrency stress test** (`backend/tests/concurrency.test.ts`) —
+the original test suite verified the capacity-check *logic* was correct,
+but ran requests sequentially, which can never actually prove a race
+condition is closed. This test fires 30 registration requests at a
+5-seat event *truly simultaneously* (`Promise.all`, all in flight before
+any resolves) and asserts the database is never oversold — verified
+directly against the database, not just HTTP response codes. Finding
+this test's own false-start is itself a good story: it initially failed,
+not from an overselling bug, but because the newly-added signup rate
+limiter was too strict for the test's own legitimate signup burst,
+returning 401s downstream from silently-rejected signups. Fixed by
+raising the signup limit to a more realistic real-world number.
+
 ## Limitations
 
 - SQLite is used for simplicity and zero-setup local development; a
   production deployment serving real concurrent traffic would likely
   want Postgres, though the concurrency-safety patterns here (real SQL
   transactions) carry over directly
-- No rate limiting on auth endpoints yet — a real deployment should add
-  this to slow down credential-stuffing attempts
+- Rate limiting and caching are both in-memory/single-process (see above)
+  — the natural next step for a multi-instance deployment is Redis for
+  both, which the code is deliberately structured to make a small,
+  contained change rather than a rewrite
 - No email verification or password-reset flow
 - The Gemini AI description generator requires your own API key
   (`GEMINI_API_KEY`) and is optional — the app works fully without it
